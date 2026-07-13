@@ -22,7 +22,7 @@ class Product(models.Model):
         null=True, blank=True,
         validators=[MaxValueValidator(100)]
     )
-    image = models.ImageField(upload_to='products/')
+    image = models.ImageField(upload_to='images/products/')
     unit = models.CharField(max_length=30)
     stock = models.PositiveIntegerField(default=0)
     expiration_date = models.DateField()
