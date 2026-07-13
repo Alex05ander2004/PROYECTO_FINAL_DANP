@@ -8,14 +8,7 @@ Backend en Django + Django REST Framework para la plataforma ReFood.
 - PostgreSQL (con pgAdmin recomendado)
 - Git
 
-## 1. Clonar el repositorio
-
-```bash
-git clone <url-del-repo>
-cd ReFood-Backend
-```
-
-## 2. Crear y activar el entorno virtual
+## 1. Crear y activar el entorno virtual
 
 **Windows (Git Bash):**
 ```bash
@@ -29,14 +22,14 @@ python3 -m venv venv
 source venv/bin/activate
 ```
 
-## 3. Instalar dependencias
+## 2. Instalar dependencias
 
 ```bash
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
-## 4. Configurar PostgreSQL
+## 3. Configurar PostgreSQL
 
 Usando pgAdmin:
 
@@ -50,7 +43,7 @@ GRANT ALL ON SCHEMA public TO refood_user;
 ALTER SCHEMA public OWNER TO refood_user;
 ```
 
-## 5. Configurar variables de entorno
+## 4. Configurar variables de entorno
 
 Copia la plantilla y completa tus propios valores:
 
@@ -66,13 +59,13 @@ python -c "from django.core.management.utils import get_random_secret_key; print
 
 Pega el resultado en `.env`, junto con los datos de tu base de datos local.
 
-## 6. Aplicar migraciones
+## 5. Aplicar migraciones
 
 ```bash
 python manage.py migrate
 ```
 
-## 7. Crear un superusuario (administrador)
+## 6. Crear un superusuario (administrador)
 
 ```bash
 python manage.py createsuperuser
@@ -80,7 +73,7 @@ python manage.py createsuperuser
 
 Te pedirá **email**, **name** y **password**.
 
-## 8. Levantar el servidor
+## 7. Levantar el servidor
 
 ```bash
 python manage.py runserver
