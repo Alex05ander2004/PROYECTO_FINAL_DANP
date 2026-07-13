@@ -1,3 +1,4 @@
+from django.views.generic import ListView
 from django.shortcuts import render
 from rest_framework import viewsets, permissions
 from .models import Category, Product
@@ -24,3 +25,12 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
             queryset = queryset.filter(category_id=category)
 
         return queryset
+
+# Vista genérica de lista de productos para la página principal
+class ProductIndexView(ListView):
+    model = Product
+    template_name = 'products/index.html'
+    context_object_name = 'products'
+
+    def get_queryset(self):
+        return Product.objects.filter(is_active=True).select_related('category')
