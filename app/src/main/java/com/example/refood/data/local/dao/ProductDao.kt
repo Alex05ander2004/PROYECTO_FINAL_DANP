@@ -17,7 +17,7 @@ interface ProductDao {
     @Query("SELECT * FROM products ORDER BY name ASC")
     fun observeAll(): Flow<List<ProductEntity>>
 
-    @Query("SELECT * FROM products WHERE isFeaturedOffer = 1 ORDER BY name ASC")
+    @Query("SELECT * FROM products WHERE isFeaturedOffer = 1 ORDER BY expirationDate ASC")
     fun observeOffers(): Flow<List<ProductEntity>>
 
     @Query("SELECT * FROM products WHERE id = :id LIMIT 1")

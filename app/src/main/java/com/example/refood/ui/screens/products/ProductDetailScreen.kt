@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.example.refood.ui.components.ExpiryLabel
 import com.example.refood.ui.components.LoadingIndicator
 import com.example.refood.ui.components.OfferBadge
 import com.example.refood.ui.components.PrimaryButton
@@ -105,6 +106,8 @@ fun ProductDetailScreen(
                         Spacer(modifier = Modifier.width(8.dp))
                         OfferBadge(percentOff = product.discountPercent!!)
                     }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    ExpiryLabel(product = product)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -121,7 +124,7 @@ fun ProductDetailScreen(
 
                 InfoRow(label = "Presentación", value = product.unit)
                 InfoRow(label = "Stock disponible", value = "${product.stock} unidades")
-                InfoRow(label = "Fecha de vencimiento", value = product.expirationDate)
+                InfoRow(label = "Fecha de vencimiento", value = product.expirationDateLabel)
 
                 Spacer(modifier = Modifier.height(20.dp))
                 Text(text = "Cantidad", style = MaterialTheme.typography.titleSmall)
