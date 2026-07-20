@@ -25,5 +25,6 @@ data class OrderEntity(
     val deliveryAddress: String,
     val paymentMethod: String,
     val notes: String,
-    val total: Double
+    val total: Double,
+    val paymentReference: String? = null
 )

@@ -92,6 +92,15 @@ fun OrderDetailScreen(
             Text(text = "Método de pago", style = MaterialTheme.typography.titleMedium)
             Text(text = order.paymentMethod, style = MaterialTheme.typography.bodyMedium)
 
+            if (!order.paymentReference.isNullOrBlank()) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "N° de operación: ${order.paymentReference}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
             if (order.notes.isNotBlank()) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(text = "Notas", style = MaterialTheme.typography.titleMedium)

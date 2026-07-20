@@ -10,7 +10,8 @@ interface OrderRepository {
         deliveryAddress: String,
         paymentMethod: String,
         notes: String,
-        lines: List<CartLine>
+        lines: List<CartLine>,
+        paymentReference: String? = null
     ): Result<Long>
 
     fun observeOrdersForUser(userId: Long): Flow<List<Order>>

@@ -1,5 +1,7 @@
 package com.example.refood.ui.screens.order
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,6 +11,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
@@ -23,6 +27,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.refood.ui.components.PrimaryButton
 import com.example.refood.ui.components.ReFoodTopBar
@@ -99,6 +105,48 @@ fun OrderFormScreen(
                     )
                     Text(text = method, style = MaterialTheme.typography.bodyMedium)
                 }
+            }
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = if (uiState.requiresOperationNumber) {
+                    "Envía el pago desde tu app de ${uiState.paymentMethod} y luego escribe el número de operación."
+                } else {
+                    "Pagarás en efectivo cuando recibas tu pedido."
+                },
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            if (uiState.requiresOperationNumber) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(10.dp))
+                        .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(10.dp))
+                        .padding(14.dp)
+                ) {
+                    Text(
+                        text = "Número ${uiState.paymentMethod} de ReFood",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = STORE_PAYMENT_NUMBER,
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+                OutlinedTextField(
+                    value = uiState.operationNumber,
+                    onValueChange = viewModel::onOperationNumberChange,
+                    label = { Text("Número de operación") },
+                    placeholder = { Text("12345678") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))

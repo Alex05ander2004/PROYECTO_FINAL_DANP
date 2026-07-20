@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.refood.data.local.dao.CartDao
 import com.example.refood.data.local.dao.OrderDao
 import com.example.refood.data.local.dao.ProductDao
@@ -24,7 +26,7 @@ import kotlinx.coroutines.launch
         OrderEntity::class,
         OrderItemEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -37,6 +39,12 @@ abstract class AppDatabase : RoomDatabase() {
         @Volatile
         private var instance: AppDatabase? = null
 
+        private val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE orders ADD COLUMN paymentReference TEXT")
+            }
+        }
+
         fun getInstance(context: Context, applicationScope: CoroutineScope): AppDatabase =
             instance ?: synchronized(this) {
                 instance ?: build(context, applicationScope).also { instance = it }
@@ -47,13 +55,14 @@ abstract class AppDatabase : RoomDatabase() {
                 context.applicationContext,
                 AppDatabase::class.java,
                 "refood.db"
-            ).addCallback(object : Callback() {
-                override fun onCreate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
-                    super.onCreate(db)
-                    applicationScope.launch {
-                        instance?.productDao()?.insertAll(DatabaseSeeder.sampleProducts())
+            ).addMigrations(MIGRATION_1_2)
+                .addCallback(object : Callback() {
+                    override fun onCreate(db: SupportSQLiteDatabase) {
+                        super.onCreate(db)
+                        applicationScope.launch {
+                            instance?.productDao()?.insertAll(DatabaseSeeder.sampleProducts())
+                        }
                     }
-                }
-            }).build()
+                }).build()
     }
 }

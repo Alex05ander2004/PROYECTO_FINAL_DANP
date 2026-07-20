@@ -8,6 +8,7 @@ import com.example.refood.data.repository.AuthRepository
 import com.example.refood.data.repository.CartRepository
 import com.example.refood.data.repository.OrderRepository
 import com.example.refood.domain.model.CartLine
+import com.example.refood.domain.validation.FieldValidators
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -17,27 +18,41 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-val PAYMENT_METHODS = listOf("Efectivo", "Tarjeta", "Yape / Plin")
+// Debe coincidir con Order.PaymentMethod del backend (EFECTIVO / YAPE / PLIN).
+val PAYMENT_METHODS = listOf("Efectivo", "Yape", "Plin")
+
+/** Número de contacto de ReFood para pagos por Yape/Plin. Placeholder hasta que exista
+ *  un dato real de la tienda/administrador en el backend. */
+const val STORE_PAYMENT_NUMBER = "987 654 321"
+
+fun paymentMethodRequiresReference(paymentMethod: String) = paymentMethod != "Efectivo"
 
 data class OrderFormUiState(
     val lines: List<CartLine> = emptyList(),
     val total: Double = 0.0,
     val deliveryAddress: String = "",
     val paymentMethod: String = PAYMENT_METHODS.first(),
+    val operationNumber: String = "",
     val notes: String = "",
     val isLoading: Boolean = true,
     val isSubmitting: Boolean = false,
     val errorMessage: String? = null,
     val placedOrderId: Long? = null
+) {
+    val requiresOperationNumber: Boolean get() = paymentMethodRequiresReference(paymentMethod)
+}
+
+private data class DraftFields(
+    val address: String,
+    val payment: String,
+    val operationNumber: String,
+    val notes: String
 )
 
 private data class FormFields(
-    val address: String,
-    val payment: String,
-    val notes: String,
+    val draft: DraftFields,
     val submitting: Boolean,
     val error: String?,
     val orderId: Long?
@@ -52,6 +67,7 @@ class OrderFormViewModel(
     private val userIdFlow = authRepository.currentUserId.filterNotNull()
     private val deliveryAddress = MutableStateFlow("")
     private val paymentMethod = MutableStateFlow(PAYMENT_METHODS.first())
+    private val operationNumber = MutableStateFlow("")
     private val notes = MutableStateFlow("")
     private val isSubmitting = MutableStateFlow(false)
     private val errorMessage = MutableStateFlow<String?>(null)
@@ -65,14 +81,13 @@ class OrderFormViewModel(
         }
     }
 
+    private val draftFieldsFlow = combine(
+        deliveryAddress, paymentMethod, operationNumber, notes
+    ) { address, payment, opNumber, n -> DraftFields(address, payment, opNumber, n) }
+
     private val formFieldsFlow = combine(
-        combine(deliveryAddress, paymentMethod, notes) { a, p, n -> Triple(a, p, n) },
-        isSubmitting,
-        errorMessage,
-        placedOrderId
-    ) { (address, payment, n), submitting, error, orderId ->
-        FormFields(address, payment, n, submitting, error, orderId)
-    }
+        draftFieldsFlow, isSubmitting, errorMessage, placedOrderId
+    ) { draft, submitting, error, orderId -> FormFields(draft, submitting, error, orderId) }
 
     val uiState: StateFlow<OrderFormUiState> = combine(
         userIdFlow.flatMapLatest { cartRepository.observeCart(it) },
@@ -81,9 +96,10 @@ class OrderFormViewModel(
         OrderFormUiState(
             lines = lines,
             total = lines.sumOf { it.lineTotal },
-            deliveryAddress = form.address,
-            paymentMethod = form.payment,
-            notes = form.notes,
+            deliveryAddress = form.draft.address,
+            paymentMethod = form.draft.payment,
+            operationNumber = form.draft.operationNumber,
+            notes = form.draft.notes,
             isLoading = false,
             isSubmitting = form.submitting,
             errorMessage = form.error,
@@ -98,6 +114,12 @@ class OrderFormViewModel(
 
     fun onPaymentMethodChange(value: String) {
         paymentMethod.value = value
+        errorMessage.value = null
+    }
+
+    fun onOperationNumberChange(value: String) {
+        operationNumber.value = value.filter { it.isDigit() }.take(10)
+        errorMessage.value = null
     }
 
     fun onNotesChange(value: String) {
@@ -110,9 +132,17 @@ class OrderFormViewModel(
             errorMessage.value = "Tu carrito está vacío."
             return
         }
-        if (state.deliveryAddress.isBlank()) {
-            errorMessage.value = "Ingresa una dirección de entrega."
+        val addressError = FieldValidators.addressError(state.deliveryAddress)
+        if (addressError != null) {
+            errorMessage.value = addressError
             return
+        }
+        if (state.requiresOperationNumber) {
+            val operationError = FieldValidators.operationNumberError(state.operationNumber)
+            if (operationError != null) {
+                errorMessage.value = operationError
+                return
+            }
         }
         viewModelScope.launch {
             isSubmitting.value = true
@@ -122,7 +152,8 @@ class OrderFormViewModel(
                 deliveryAddress = state.deliveryAddress,
                 paymentMethod = state.paymentMethod,
                 notes = state.notes,
-                lines = state.lines
+                lines = state.lines,
+                paymentReference = if (state.requiresOperationNumber) state.operationNumber else null
             ).onSuccess { orderId ->
                 isSubmitting.value = false
                 placedOrderId.value = orderId

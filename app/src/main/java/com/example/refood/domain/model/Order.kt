@@ -25,5 +25,6 @@ data class Order(
     val paymentMethod: String,
     val notes: String,
     val total: Double,
+    val paymentReference: String? = null,
     val items: List<OrderLine> = emptyList()
 )

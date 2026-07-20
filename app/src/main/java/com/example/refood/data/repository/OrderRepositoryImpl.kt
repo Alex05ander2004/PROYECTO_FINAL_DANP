@@ -26,7 +26,8 @@ class OrderRepositoryImpl(
         deliveryAddress: String,
         paymentMethod: String,
         notes: String,
-        lines: List<CartLine>
+        lines: List<CartLine>,
+        paymentReference: String?
     ): Result<Long> {
         if (lines.isEmpty()) {
             return Result.failure(IllegalStateException("El carrito está vacío."))
@@ -40,7 +41,8 @@ class OrderRepositoryImpl(
                 deliveryAddress = deliveryAddress.trim(),
                 paymentMethod = paymentMethod,
                 notes = notes.trim(),
-                total = total
+                total = total,
+                paymentReference = paymentReference?.trim()?.takeIf { it.isNotBlank() }
             )
         )
         orderDao.insertItems(
@@ -79,7 +81,8 @@ class OrderRepositoryImpl(
         deliveryAddress = deliveryAddress,
         paymentMethod = paymentMethod,
         notes = notes,
-        total = total
+        total = total,
+        paymentReference = paymentReference
     )
 
     private fun OrderItemEntity.toDomain() = OrderLine(
