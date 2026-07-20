@@ -38,10 +38,12 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
 class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True, read_only=True)
+    user_email = serializers.EmailField(source='user.email', read_only=True)
+    user_name = serializers.CharField(source='user.name', read_only=True)
 
     class Meta:
         model = Order
-        fields = ['id', 'status', 'delivery_address', 'payment_method', 'notes', 'total', 'created_at', 'items']
+        fields = ['id', 'user_email', 'user_name', 'status', 'delivery_address', 'payment_method', 'notes', 'total', 'created_at', 'items']
         read_only_fields = ['status', 'total']
 
 class CreateOrderSerializer(serializers.Serializer):
@@ -87,3 +89,8 @@ class CreateOrderSerializer(serializers.Serializer):
             cart_items.delete()
 
         return order
+
+class UpdateOrderStatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ['status']

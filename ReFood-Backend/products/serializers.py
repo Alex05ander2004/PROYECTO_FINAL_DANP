@@ -7,11 +7,15 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = ['id', 'name']
 
 class ProductSerializer(serializers.ModelSerializer):
-    category = serializers.SlugRelatedField(slug_field='name', read_only=True)
+    category = serializers.SlugRelatedField(
+        slug_field='name',
+        queryset=Category.objects.all()
+    )
 
     class Meta:
         model = Product
         fields = [
-            'id', 'name', 'description', 'category', 'price', 'discount_price',
-            'image', 'unit', 'stock', 'expiration_date', 'is_featured_offer',
+            'id', 'name', 'description', 'category', 'price', 'discount_percentage',
+            'discount_price', 'image', 'unit', 'stock', 'expiration_date',
+            'is_featured_offer', 'is_active',
         ]
