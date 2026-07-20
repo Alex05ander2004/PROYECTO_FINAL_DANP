@@ -8,11 +8,10 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     category = serializers.SlugRelatedField(slug_field='name', read_only=True)
-    discountPrice = serializers.FloatField(source='discount_price', read_only=True)
 
     class Meta:
         model = Product
         fields = [
-            'id', 'name', 'description', 'category', 'price', 'discountPrice',
+            'id', 'name', 'description', 'category', 'price', 'discount_price',
             'image', 'unit', 'stock', 'expiration_date', 'is_featured_offer',
         ]
