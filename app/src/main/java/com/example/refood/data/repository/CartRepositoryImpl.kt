@@ -43,11 +43,13 @@ class CartRepositoryImpl(
         cartDao.observeCart(userId).map { items -> items.sumOf { it.quantity } }
 
     override suspend fun addToCart(userId: Long, productId: Long, quantity: Int) {
+        val maxStock = (productDao.getById(productId)?.stock ?: Int.MAX_VALUE).coerceAtLeast(1)
         val existing = cartDao.getItem(userId, productId)
         if (existing != null) {
-            cartDao.update(existing.copy(quantity = existing.quantity + quantity))
+            val newQuantity = (existing.quantity + quantity).coerceAtMost(maxStock)
+            cartDao.update(existing.copy(quantity = newQuantity))
         } else {
-            cartDao.insert(CartItemEntity(userId = userId, productId = productId, quantity = quantity))
+            cartDao.insert(CartItemEntity(userId = userId, productId = productId, quantity = quantity.coerceAtMost(maxStock)))
         }
     }
 
@@ -57,7 +59,8 @@ class CartRepositoryImpl(
             return
         }
         val existing = cartDao.getById(cartItemId) ?: return
-        cartDao.update(existing.copy(quantity = quantity))
+        val maxStock = (productDao.getById(existing.productId)?.stock ?: Int.MAX_VALUE).coerceAtLeast(1)
+        cartDao.update(existing.copy(quantity = quantity.coerceAtMost(maxStock)))
     }
 
     override suspend fun removeItem(cartItemId: Long) {

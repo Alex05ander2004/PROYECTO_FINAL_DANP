@@ -35,7 +35,10 @@ class CartViewModel(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), CartUiState())
 
     fun increment(line: CartLine) {
-        viewModelScope.launch { cartRepository.updateQuantity(line.cartItemId, line.quantity + 1) }
+        val maxStock = line.product.stock.coerceAtLeast(1)
+        val newQuantity = (line.quantity + 1).coerceAtMost(maxStock)
+        if (newQuantity == line.quantity) return
+        viewModelScope.launch { cartRepository.updateQuantity(line.cartItemId, newQuantity) }
     }
 
     fun decrement(line: CartLine) {
