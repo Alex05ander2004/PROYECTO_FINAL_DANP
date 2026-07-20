@@ -2,39 +2,45 @@ package com.example.refood.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Marca ReFood: verde (frescura/sostenibilidad) + ámbar (ofertas/urgencia)
-val Green10 = Color(0xFF002106)
-val Green20 = Color(0xFF07390F)
-val Green30 = Color(0xFF14501C)
-val Green40 = Color(0xFF1E6B27)
-val Green50 = Color(0xFF2A8636)
-val Green80 = Color(0xFFA0D9A4)
-val Green90 = Color(0xFFBEF0C1)
-val Green95 = Color(0xFFDCFADC)
+// ReFood — sistema minimalista: un solo acento (verde bosque), neutros casi
+// monocromos con sesgo frío, y un tono terracota apagado reservado solo para
+// señalar descuentos en texto (nunca como color de marca).
 
-val Amber40 = Color(0xFFB2690A)
-val Amber80 = Color(0xFFFFB868)
-val Amber90 = Color(0xFFFFDDB8)
+// Light
+val LightInk = Color(0xFF14181A)
+val LightInkSoft = Color(0xFF6C716C)
+val LightPaper = Color(0xFFF7F8F5)
+val LightSurface = Color(0xFFFFFFFF)
+val LightSurfaceSunken = Color(0xFFEFF1EA)
+val LightLine = Color(0xFFE1E4DC)
+val LightAccent = Color(0xFF1F5C3A)
+val LightAccentSoft = Color(0xFFE7EFE8)
+val LightOnAccent = Color(0xFFFFFFFF)
+val LightDeal = Color(0xFF93552F)
+val LightError = Color(0xFFB3261E)
 
-val Red40 = Color(0xFFBA1A1A)
-val Red80 = Color(0xFFFFB4AB)
-val Red90 = Color(0xFFFFDAD6)
+// Dark
+val DarkInk = Color(0xFFEBEEEA)
+val DarkInkSoft = Color(0xFF9BA39A)
+val DarkPaper = Color(0xFF101210)
+val DarkSurface = Color(0xFF171917)
+val DarkSurfaceSunken = Color(0xFF1D201D)
+val DarkLine = Color(0xFF2B2E29)
+val DarkAccent = Color(0xFF74C08F)
+val DarkAccentSoft = Color(0xFF1B2A20)
+val DarkOnAccent = Color(0xFF08150E)
+val DarkDeal = Color(0xFFCB9868)
+val DarkError = Color(0xFFFFB4AB)
 
-val Neutral10 = Color(0xFF191D18)
-val Neutral20 = Color(0xFF2E322D)
-val Neutral90 = Color(0xFFE1E4DC)
-val Neutral95 = Color(0xFFEFF2E9)
-val Neutral99 = Color(0xFFFBFDF7)
-
-val NeutralVariant30 = Color(0xFF43483F)
-val NeutralVariant50 = Color(0xFF73796D)
-val NeutralVariant60 = Color(0xFF8D9387)
-val NeutralVariant80 = Color(0xFFC2C8BB)
-val NeutralVariant90 = Color(0xFFDEE5D4)
-
-// Estados de pedido
-val StatusPending = Color(0xFFB2690A)
+// Estados de pedido — puntos de estado, no fondos sólidos
+val StatusPending = Color(0xFFAD6A2E)
 val StatusPreparing = Color(0xFF5B6BC0)
-val StatusReady = Color(0xFF2A8636)
+val StatusReady = Color(0xFF1F5C3A)
 val StatusDelivered = Color(0xFF3D6B3D)
-val StatusCancelled = Color(0xFFBA1A1A)
+val StatusCancelled = Color(0xFFB3261E)
+
+val StatusPendingDark = Color(0xFFE3A46B)
+val StatusPreparingDark = Color(0xFF9AA6E8)
+val StatusReadyDark = Color(0xFF74C08F)
+val StatusDeliveredDark = Color(0xFF8FBF8F)
+val StatusCancelledDark = Color(0xFFFFB4AB)

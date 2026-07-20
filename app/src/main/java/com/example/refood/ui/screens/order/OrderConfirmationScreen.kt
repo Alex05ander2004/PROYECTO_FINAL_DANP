@@ -51,7 +51,7 @@ fun OrderConfirmationScreen(
         Spacer(modifier = Modifier.height(32.dp))
         PrimaryButton(text = "Ver mis pedidos", onClick = onSeeOrders, modifier = Modifier.fillMaxWidth())
         Spacer(modifier = Modifier.height(12.dp))
-        OutlinedButton(onClick = onContinueShopping, modifier = Modifier.fillMaxWidth().height(52.dp)) {
+        OutlinedButton(onClick = onContinueShopping, modifier = Modifier.fillMaxWidth().height(48.dp)) {
             Text("Seguir comprando")
         }
     }

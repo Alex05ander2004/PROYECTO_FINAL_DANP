@@ -3,7 +3,7 @@ package com.example.refood.data.local
 import com.example.refood.data.local.entity.ProductEntity
 
 /** Catálogo de ejemplo para poblar la base de datos local mientras no exista un backend compartido. */
-object DatabaseSeeder {
+object  DatabaseSeeder {
 
     fun sampleProducts(): List<ProductEntity> = listOf(
         ProductEntity(

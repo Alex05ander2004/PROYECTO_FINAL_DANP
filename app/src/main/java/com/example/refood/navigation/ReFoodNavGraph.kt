@@ -1,14 +1,20 @@
 package com.example.refood.navigation
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
@@ -57,22 +63,41 @@ fun ReFoodNavGraph(container: AppContainer) {
     Scaffold(
         bottomBar = {
             if (showBottomBar) {
-                NavigationBar {
-                    TopLevelDestination.entries.forEach { destination ->
-                        NavigationBarItem(
-                            selected = currentRoute == destination.screen.route,
-                            onClick = {
-                                navController.navigate(destination.screen.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
+                Column {
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
+                    NavigationBar(
+                        containerColor = MaterialTheme.colorScheme.background,
+                        tonalElevation = 0.dp
+                    ) {
+                        TopLevelDestination.entries.forEach { destination ->
+                            val selected = currentRoute == destination.screen.route
+                            NavigationBarItem(
+                                selected = selected,
+                                onClick = {
+                                    navController.navigate(destination.screen.route) {
+                                        popUpTo(navController.graph.findStartDestination().id) {
+                                            saveState = true
+                                        }
+                                        launchSingleTop = true
+                                        restoreState = true
                                     }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            },
-                            icon = { Icon(destination.icon, contentDescription = destination.label) },
-                            label = { Text(destination.label) }
-                        )
+                                },
+                                icon = {
+                                    Icon(
+                                        if (selected) destination.iconFilled else destination.iconOutlined,
+                                        contentDescription = destination.label
+                                    )
+                                },
+                                label = { Text(destination.label, style = MaterialTheme.typography.labelMedium) },
+                                colors = NavigationBarItemDefaults.colors(
+                                    selectedIconColor = MaterialTheme.colorScheme.primary,
+                                    selectedTextColor = MaterialTheme.colorScheme.primary,
+                                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    indicatorColor = Color.Transparent
+                                )
+                            )
+                        }
                     }
                 }
             }

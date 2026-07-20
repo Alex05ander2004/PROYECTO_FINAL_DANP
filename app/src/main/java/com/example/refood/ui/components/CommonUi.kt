@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Inbox
+import androidx.compose.material.icons.outlined.Inbox
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -38,7 +38,7 @@ fun EmptyState(
     title: String,
     message: String,
     modifier: Modifier = Modifier,
-    icon: ImageVector = Icons.Filled.Inbox
+    icon: ImageVector = Icons.Outlined.Inbox
 ) {
     Column(
         modifier = modifier
@@ -50,8 +50,8 @@ fun EmptyState(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            modifier = Modifier.height(56.dp),
-            tint = MaterialTheme.colorScheme.outline
+            modifier = Modifier.height(40.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
@@ -81,9 +81,15 @@ fun PrimaryButton(
         enabled = enabled,
         shape = MaterialTheme.shapes.medium,
         colors = ButtonDefaults.buttonColors(),
+        elevation = ButtonDefaults.buttonElevation(
+            defaultElevation = 0.dp,
+            pressedElevation = 0.dp,
+            focusedElevation = 0.dp,
+            hoveredElevation = 0.dp
+        ),
         modifier = modifier
             .fillMaxWidth()
-            .height(52.dp)
+            .height(48.dp)
     ) {
         Text(text = text, style = MaterialTheme.typography.titleMedium)
     }

@@ -6,6 +6,11 @@ import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Storefront
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.LocalOffer
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.ReceiptLong
+import androidx.compose.material.icons.outlined.Storefront
 import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class Screen(val route: String) {
@@ -38,15 +43,17 @@ sealed class Screen(val route: String) {
     }
 }
 
-/** Destinos de nivel superior mostrados en la barra de navegación inferior. */
+/** Destinos de nivel superior mostrados en la barra de navegación inferior.
+ *  Ícono outline en reposo, filled cuando está seleccionado (patrón sutil de apps premium). */
 enum class TopLevelDestination(
     val screen: Screen,
     val label: String,
-    val icon: ImageVector
+    val iconOutlined: ImageVector,
+    val iconFilled: ImageVector
 ) {
-    HOME(Screen.Home, "Inicio", Icons.Filled.Home),
-    PRODUCTS(Screen.Products, "Productos", Icons.Filled.Storefront),
-    OFFERS(Screen.Offers, "Ofertas", Icons.Filled.LocalOffer),
-    ORDERS(Screen.MyOrders, "Pedidos", Icons.Filled.ReceiptLong),
-    PROFILE(Screen.Profile, "Perfil", Icons.Filled.Person)
+    HOME(Screen.Home, "Inicio", Icons.Outlined.Home, Icons.Filled.Home),
+    PRODUCTS(Screen.Products, "Productos", Icons.Outlined.Storefront, Icons.Filled.Storefront),
+    OFFERS(Screen.Offers, "Ofertas", Icons.Outlined.LocalOffer, Icons.Filled.LocalOffer),
+    ORDERS(Screen.MyOrders, "Pedidos", Icons.Outlined.ReceiptLong, Icons.Filled.ReceiptLong),
+    PROFILE(Screen.Profile, "Perfil", Icons.Outlined.Person, Icons.Filled.Person)
 }

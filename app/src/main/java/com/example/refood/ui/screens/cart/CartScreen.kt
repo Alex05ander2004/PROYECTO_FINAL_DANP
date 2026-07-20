@@ -14,9 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -81,16 +79,16 @@ fun CartScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding),
-                contentPadding = PaddingValues(20.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                contentPadding = PaddingValues(vertical = 8.dp)
             ) {
                 items(uiState.lines, key = { it.cartItemId }) { line ->
-                    CartLineCard(
+                    CartLineRow(
                         line = line,
                         onIncrement = { viewModel.increment(line) },
                         onDecrement = { viewModel.decrement(line) },
                         onRemove = { viewModel.remove(line) }
                     )
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
                 }
             }
         }
@@ -98,64 +96,60 @@ fun CartScreen(
 }
 
 @Composable
-private fun CartLineCard(
+private fun CartLineRow(
     line: CartLine,
     onIncrement: () -> Unit,
     onDecrement: () -> Unit,
     onRemove: () -> Unit
 ) {
-    Card(
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    Row(
+        modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+        AsyncImage(
+            model = line.product.imageUrl,
+            contentDescription = line.product.name,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size(60.dp)
+                .clip(RoundedCornerShape(8.dp))
+        )
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 14.dp)
         ) {
-            AsyncImage(
-                model = line.product.imageUrl,
-                contentDescription = line.product.name,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(64.dp)
-                    .clip(RoundedCornerShape(12.dp))
+            Text(
+                text = line.product.name,
+                style = MaterialTheme.typography.titleSmall,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = 12.dp)
-            ) {
-                Text(
-                    text = line.product.name,
-                    style = MaterialTheme.typography.titleSmall,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    text = "S/ %.2f c/u".format(line.product.effectivePrice),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                QuantityStepper(
-                    quantity = line.quantity,
-                    onIncrement = onIncrement,
-                    onDecrement = onDecrement
+            Text(
+                text = "S/ %.2f c/u".format(line.product.effectivePrice),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            QuantityStepper(
+                quantity = line.quantity,
+                onIncrement = onIncrement,
+                onDecrement = onDecrement
+            )
+        }
+        Column(horizontalAlignment = Alignment.End) {
+            IconButton(onClick = onRemove, modifier = Modifier.size(32.dp)) {
+                Icon(
+                    Icons.Outlined.DeleteOutline,
+                    contentDescription = "Eliminar",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            Column(horizontalAlignment = Alignment.End) {
-                IconButton(onClick = onRemove) {
-                    Icon(
-                        Icons.Filled.Delete,
-                        contentDescription = "Eliminar",
-                        tint = MaterialTheme.colorScheme.error
-                    )
-                }
-                Text(
-                    text = "S/ %.2f".format(line.lineTotal),
-                    style = MaterialTheme.typography.titleSmall
-                )
-            }
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "S/ %.2f".format(line.lineTotal),
+                style = MaterialTheme.typography.titleSmall
+            )
         }
     }
 }

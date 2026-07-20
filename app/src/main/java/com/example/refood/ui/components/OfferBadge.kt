@@ -1,6 +1,7 @@
 package com.example.refood.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -14,11 +15,12 @@ import androidx.compose.ui.unit.dp
 fun OfferBadge(percentOff: Int, modifier: Modifier = Modifier) {
     Text(
         text = "-$percentOff%",
-        style = MaterialTheme.typography.labelMedium,
-        fontWeight = FontWeight.Bold,
-        color = MaterialTheme.colorScheme.onSecondary,
+        style = MaterialTheme.typography.labelSmall,
+        fontWeight = FontWeight.SemiBold,
+        color = MaterialTheme.colorScheme.secondary,
         modifier = modifier
-            .background(MaterialTheme.colorScheme.secondary, RoundedCornerShape(8.dp))
-            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.92f), RoundedCornerShape(6.dp))
+            .border(1.dp, MaterialTheme.colorScheme.secondary, RoundedCornerShape(6.dp))
+            .padding(horizontal = 7.dp, vertical = 3.dp)
     )
 }

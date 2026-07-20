@@ -10,9 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -52,11 +50,11 @@ fun MyOrdersScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding),
-                contentPadding = PaddingValues(20.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                contentPadding = PaddingValues(vertical = 8.dp)
             ) {
                 items(uiState.orders, key = { it.id }) { order ->
-                    OrderSummaryCard(order = order, onClick = { onOrderClick(order.id) })
+                    OrderSummaryRow(order = order, onClick = { onOrderClick(order.id) })
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
                 }
             }
         }
@@ -64,41 +62,38 @@ fun MyOrdersScreen(
 }
 
 @Composable
-private fun OrderSummaryCard(order: Order, onClick: () -> Unit) {
+private fun OrderSummaryRow(order: Order, onClick: () -> Unit) {
     val dateFormatter = remember { SimpleDateFormat("dd MMM yyyy, HH:mm", Locale("es", "PE")) }
-    Card(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 20.dp, vertical = 14.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(text = "Pedido #${order.id}", style = MaterialTheme.typography.titleMedium)
-                StatusChip(status = order.status)
-            }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(text = "Pedido #${order.id}", style = MaterialTheme.typography.titleMedium)
+            StatusChip(status = order.status)
+        }
+        Text(
+            text = dateFormatter.format(Date(order.createdAt)),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(text = order.deliveryAddress, style = MaterialTheme.typography.bodySmall, maxLines = 1)
             Text(
-                text = dateFormatter.format(Date(order.createdAt)),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                text = "S/ %.2f".format(order.total),
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurface
             )
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(text = order.deliveryAddress, style = MaterialTheme.typography.bodySmall, maxLines = 1)
-                Text(
-                    text = "S/ %.2f".format(order.total),
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
         }
     }
 }
