@@ -15,7 +15,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -48,7 +48,7 @@ fun RegisterScreen(
             .padding(horizontal = 24.dp, vertical = 8.dp)
     ) {
         IconButton(onClick = onBack) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
+            Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Volver")
         }
         Text(text = "Crea tu cuenta", style = MaterialTheme.typography.headlineSmall)
         Text(
@@ -70,6 +70,7 @@ fun RegisterScreen(
             value = uiState.email,
             onValueChange = viewModel::onEmailChange,
             label = { Text("Correo electrónico") },
+            placeholder = { Text("ejemplo@gmail.com") },
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             modifier = Modifier.fillMaxWidth()
@@ -79,8 +80,9 @@ fun RegisterScreen(
             value = uiState.phone,
             onValueChange = viewModel::onPhoneChange,
             label = { Text("Teléfono") },
+            placeholder = { Text("987654321") },
             singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(12.dp))

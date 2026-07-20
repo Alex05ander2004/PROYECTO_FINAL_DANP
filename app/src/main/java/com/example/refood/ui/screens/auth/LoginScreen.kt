@@ -68,6 +68,7 @@ fun LoginScreen(
             value = uiState.email,
             onValueChange = viewModel::onEmailChange,
             label = { Text("Correo electrónico") },
+            placeholder = { Text("ejemplo@gmail.com") },
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             modifier = Modifier.fillMaxWidth()

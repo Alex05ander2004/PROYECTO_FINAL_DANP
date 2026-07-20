@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.refood.data.repository.AuthRepository
 import com.example.refood.domain.model.User
+import com.example.refood.domain.validation.FieldValidators
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,6 +20,7 @@ data class ProfileUiState(
     val isLoading: Boolean = true,
     val isSaving: Boolean = false,
     val saveMessage: String? = null,
+    val errorMessage: String? = null,
     val loggedOut: Boolean = false
 )
 
@@ -46,21 +48,38 @@ class ProfileViewModel(private val authRepository: AuthRepository) : ViewModel()
         }
     }
 
-    fun onNameChange(value: String) = _uiState.update { it.copy(name = value, saveMessage = null) }
-    fun onPhoneChange(value: String) = _uiState.update { it.copy(phone = value, saveMessage = null) }
-    fun onAddressChange(value: String) = _uiState.update { it.copy(address = value, saveMessage = null) }
+    fun onNameChange(value: String) =
+        update { it.copy(name = value.filter { c -> !c.isDigit() }) }
+
+    fun onPhoneChange(value: String) =
+        update { it.copy(phone = value.filter { c -> c.isDigit() }.take(9)) }
+
+    fun onAddressChange(value: String) = update { it.copy(address = value) }
+
+    private fun update(block: (ProfileUiState) -> ProfileUiState) {
+        _uiState.update { block(it).copy(saveMessage = null, errorMessage = null) }
+    }
 
     fun saveProfile() {
         val id = userId ?: return
         val state = _uiState.value
+
+        val validationError = FieldValidators.nameError(state.name)
+            ?: FieldValidators.phoneError(state.phone)
+            ?: FieldValidators.addressError(state.address)
+        if (validationError != null) {
+            _uiState.update { it.copy(errorMessage = validationError, saveMessage = null) }
+            return
+        }
+
         viewModelScope.launch {
-            _uiState.update { it.copy(isSaving = true) }
+            _uiState.update { it.copy(isSaving = true, errorMessage = null) }
             authRepository.updateUser(
                 User(id = id, name = state.name, email = state.email, phone = state.phone, address = state.address)
             ).onSuccess {
                 _uiState.update { it.copy(isSaving = false, saveMessage = "Datos actualizados correctamente.") }
             }.onFailure { error ->
-                _uiState.update { it.copy(isSaving = false, saveMessage = error.message ?: "No se pudo guardar.") }
+                _uiState.update { it.copy(isSaving = false, errorMessage = error.message ?: "No se pudo guardar.") }
             }
         }
     }

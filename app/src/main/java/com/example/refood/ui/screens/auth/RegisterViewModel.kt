@@ -3,6 +3,7 @@ package com.example.refood.ui.screens.auth
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.refood.data.repository.AuthRepository
+import com.example.refood.domain.validation.FieldValidators
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,11 +27,11 @@ class RegisterViewModel(private val authRepository: AuthRepository) : ViewModel(
     private val _uiState = MutableStateFlow(RegisterUiState())
     val uiState: StateFlow<RegisterUiState> = _uiState.asStateFlow()
 
-    fun onNameChange(value: String) = update { it.copy(name = value) }
+    fun onNameChange(value: String) = update { it.copy(name = value.filter { c -> !c.isDigit() }) }
     fun onEmailChange(value: String) = update { it.copy(email = value) }
     fun onPasswordChange(value: String) = update { it.copy(password = value) }
     fun onConfirmPasswordChange(value: String) = update { it.copy(confirmPassword = value) }
-    fun onPhoneChange(value: String) = update { it.copy(phone = value) }
+    fun onPhoneChange(value: String) = update { it.copy(phone = value.filter { c -> c.isDigit() }.take(9)) }
     fun onAddressChange(value: String) = update { it.copy(address = value) }
 
     private fun update(block: (RegisterUiState) -> RegisterUiState) {
@@ -63,14 +64,12 @@ class RegisterViewModel(private val authRepository: AuthRepository) : ViewModel(
     }
 
     private fun validate(state: RegisterUiState): String? {
-        if (state.name.isBlank()) return "Ingresa tu nombre completo."
-        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(state.email).matches()) {
-            return "Ingresa un correo electrónico válido."
-        }
-        if (state.password.length < 6) return "La contraseña debe tener al menos 6 caracteres."
+        FieldValidators.nameError(state.name)?.let { return it }
+        FieldValidators.emailError(state.email)?.let { return it }
+        FieldValidators.passwordError(state.password)?.let { return it }
         if (state.password != state.confirmPassword) return "Las contraseñas no coinciden."
-        if (state.phone.isBlank()) return "Ingresa tu número de teléfono."
-        if (state.address.isBlank()) return "Ingresa tu dirección de entrega."
+        FieldValidators.phoneError(state.phone)?.let { return it }
+        FieldValidators.addressError(state.address)?.let { return it }
         return null
     }
 }

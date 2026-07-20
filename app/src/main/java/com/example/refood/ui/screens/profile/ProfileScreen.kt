@@ -1,5 +1,6 @@
 package com.example.refood.ui.screens.profile
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,10 +13,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Logout
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.outlined.Logout
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -30,6 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.refood.ui.components.LoadingIndicator
 import com.example.refood.ui.components.PrimaryButton
@@ -63,15 +66,15 @@ fun ProfileScreen(
                 modifier = Modifier
                     .size(72.dp)
                     .clip(CircleShape)
-                    .padding(0.dp),
+                    .background(MaterialTheme.colorScheme.primaryContainer),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
                 Icon(
-                    imageVector = Icons.Filled.Person,
+                    imageVector = Icons.Outlined.Person,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(72.dp)
+                    modifier = Modifier.size(32.dp)
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))
@@ -90,7 +93,9 @@ fun ProfileScreen(
                 value = uiState.phone,
                 onValueChange = viewModel::onPhoneChange,
                 label = { Text("Teléfono") },
+                placeholder = { Text("987654321") },
                 singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(12.dp))
@@ -102,6 +107,14 @@ fun ProfileScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
+            if (uiState.errorMessage != null) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = uiState.errorMessage!!,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
             if (uiState.saveMessage != null) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
@@ -125,9 +138,9 @@ fun ProfileScreen(
                 onClick = viewModel::logout,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(52.dp)
+                    .height(48.dp)
             ) {
-                Icon(Icons.Filled.Logout, contentDescription = null)
+                Icon(Icons.Outlined.Logout, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Cerrar sesión")
             }

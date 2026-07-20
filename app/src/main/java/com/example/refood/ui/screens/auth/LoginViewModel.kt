@@ -3,6 +3,7 @@ package com.example.refood.ui.screens.auth
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.refood.data.repository.AuthRepository
+import com.example.refood.domain.validation.FieldValidators
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,8 +33,11 @@ class LoginViewModel(private val authRepository: AuthRepository) : ViewModel() {
 
     fun login() {
         val state = _uiState.value
-        if (state.email.isBlank() || state.password.isBlank()) {
-            _uiState.update { it.copy(errorMessage = "Ingresa tu correo y contraseña.") }
+        val validationError = FieldValidators.emailError(state.email) ?: if (state.password.isBlank()) {
+            "Ingresa tu contraseña."
+        } else null
+        if (validationError != null) {
+            _uiState.update { it.copy(errorMessage = validationError) }
             return
         }
         viewModelScope.launch {
