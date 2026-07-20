@@ -10,8 +10,8 @@ carpeta (uno por rama; esta tabla refleja la estructura una vez integradas en `m
 | Carpeta | Proyecto | Rama |
 |---|---|---|
 | [`ReFood-App/`](ReFood-App/) | App de Clientes (Android, Kotlin, Jetpack Compose) | `Willy-ReFood_Movil` |
-| `ReFood-Backend/` | Backend (Django + Django REST Framework, PostgreSQL) | `Marco-ReFood_Web` |
-| _(pendiente)_ | Web de Administradores | — |
+| [`ReFood-Backend/`](ReFood-Backend) | Backend (Django + Django REST Framework, PostgreSQL) | `Marco-ReFood_Web` |
+| [`ReFood-Frontend/`](ReFood-Frontend) | Web de Administradores (React + Vite) | `Marco-ReFood_Frontend` |
 
 Cada carpeta tiene (o tendrá) su propio `README.md` con instrucciones de instalación y
 ejecución específicas de ese proyecto.
