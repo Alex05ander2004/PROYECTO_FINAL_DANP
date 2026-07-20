@@ -16,7 +16,7 @@ class CartItemViewSet(viewsets.ModelViewSet):
         serializer = AddCartItemSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         item = serializer.save()
-        return Response(CartItemSerializer(item).data, status=status.HTTP_201_CREATED)
+        return Response(CartItemSerializer(item, context={'request': request}).data, status=status.HTTP_201_CREATED)
 
 class OrderViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = OrderSerializer
