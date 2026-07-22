@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Mail, Lock, Loader2 } from 'lucide-react'
+import { Mail, Lock, Loader2, Leaf } from 'lucide-react'
 import { login, getMe } from '../api/authService'
 
 export default function LoginPage() {
@@ -39,44 +39,49 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="w-full max-w-sm bg-white p-8 rounded-xl shadow-md">
-        <h1 className="text-2xl font-bold text-center text-green-700 mb-1">ReFood</h1>
-        <p className="text-center text-gray-500 mb-6">Panel de administración</p>
+    <div className="min-h-screen flex items-center justify-center bg-paper px-4">
+      <div className="w-full max-w-sm bg-surface border border-line rounded-lg p-8">
+        <div className="flex flex-col items-center mb-6">
+          <div className="w-14 h-14 rounded-full bg-accent-soft flex items-center justify-center mb-3">
+            <Leaf className="w-6 h-6 text-accent" />
+          </div>
+          <h1 className="text-xl font-semibold text-ink tracking-tight">ReFood</h1>
+          <p className="text-sm text-ink-soft">Panel de administración</p>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Correo</label>
+            <label className="block text-xs font-medium text-ink-soft mb-1">Correo</label>
             <div className="relative">
-              <Mail className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-soft" />
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
+                className="w-full pl-9 pr-3 py-2.5 bg-transparent border border-line rounded-sm text-sm text-ink placeholder:text-ink-soft/70 focus:outline-none focus:border-accent"
                 placeholder="admin@refood.com"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
+            <label className="block text-xs font-medium text-ink-soft mb-1">Contraseña</label>
             <div className="relative">
-              <Lock className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-soft" />
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
+                className="w-full pl-9 pr-3 py-2.5 bg-transparent border border-line rounded-sm text-sm text-ink placeholder:text-ink-soft/70 focus:outline-none focus:border-accent"
                 placeholder="••••••••"
               />
             </div>
           </div>
 
           {error && (
-            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+            <p className="text-sm text-error bg-error-soft border border-error/30 rounded-sm px-3 py-2">
               {error}
             </p>
           )}
@@ -84,7 +89,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 bg-green-700 hover:bg-green-800 disabled:opacity-60 text-white font-medium py-2 rounded-lg transition"
+            className="w-full flex items-center justify-center gap-2 bg-accent hover:opacity-90 disabled:opacity-60 text-on-accent text-sm font-medium py-2.5 rounded-sm transition"
           >
             {loading && <Loader2 className="w-4 h-4 animate-spin" />}
             {loading ? 'Ingresando...' : 'Iniciar sesión'}

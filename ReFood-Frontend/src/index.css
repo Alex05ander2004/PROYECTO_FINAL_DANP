@@ -1,1 +1,58 @@
 @import "tailwindcss";
+
+/* Mismos tokens de marca que la app Android (ver ui/theme/Color.kt),
+   para que la web de administradores y la app de clientes se vean
+   como una sola identidad. */
+@theme {
+  --color-ink: #14181a;
+  --color-ink-soft: #6c716c;
+  --color-paper: #f7f8f5;
+  --color-surface: #ffffff;
+  --color-surface-sunken: #eff1ea;
+  --color-line: #e1e4dc;
+  --color-accent: #1f5c3a;
+  --color-accent-soft: #e7efe8;
+  --color-on-accent: #ffffff;
+  --color-deal: #93552f;
+  --color-deal-soft: #f5e9e1;
+  --color-error: #b3261e;
+  --color-error-soft: #f9dedc;
+
+  --color-status-pending: #ad6a2e;
+  --color-status-preparing: #5b6bc0;
+  --color-status-ready: #1f5c3a;
+  --color-status-delivered: #3d6b3d;
+  --color-status-cancelled: #b3261e;
+
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-ink: #ebeeea;
+    --color-ink-soft: #9ba39a;
+    --color-paper: #101210;
+    --color-surface: #171917;
+    --color-surface-sunken: #1d201d;
+    --color-line: #2b2e29;
+    --color-accent: #74c08f;
+    --color-accent-soft: #1b2a20;
+    --color-on-accent: #08150e;
+    --color-deal: #cb9868;
+    --color-deal-soft: #2a2115;
+    --color-error: #ffb4ab;
+    --color-error-soft: #3a0c0a;
+  }
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+}

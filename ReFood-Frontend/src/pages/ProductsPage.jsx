@@ -1,11 +1,30 @@
 import { useEffect, useState } from 'react'
-import { Pencil, Trash2, Plus, Loader2 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Pencil, Trash2, Plus, Loader2, LogOut, Leaf } from 'lucide-react'
 import { getProducts } from '../api/productService'
+
+function daysUntil(dateString) {
+  const target = new Date(`${dateString}T00:00:00`)
+  if (Number.isNaN(target.getTime())) return null
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  return Math.round((target - today) / 86_400_000)
+}
+
+function ExpiryLabel({ dateString }) {
+  const days = daysUntil(dateString)
+  if (days === null) return <span className="text-ink-soft">{dateString}</span>
+  if (days < 0) return <span className="text-error font-medium">Vencido</span>
+  if (days === 0) return <span className="text-deal font-medium">Vence hoy</span>
+  if (days <= 2) return <span className="text-deal font-medium">Vence en {days}d</span>
+  return <span className="text-ink-soft">{dateString}</span>
+}
 
 export default function ProductsPage() {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const navigate = useNavigate()
 
   useEffect(() => {
     async function fetchProducts() {
@@ -21,96 +40,119 @@ export default function ProductsPage() {
     fetchProducts()
   }, [])
 
+  function handleLogout() {
+    localStorage.removeItem('access_token')
+    localStorage.removeItem('refresh_token')
+    navigate('/login')
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-paper">
+      <header className="border-b border-line bg-surface">
+        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Leaf className="w-5 h-5 text-accent" />
+            <span className="font-semibold text-ink tracking-tight">ReFood — Admin</span>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-1.5 text-sm text-ink-soft hover:text-ink transition"
+          >
+            <LogOut className="w-4 h-4" />
+            Cerrar sesión
+          </button>
+        </div>
+      </header>
+
+      <main className="max-w-6xl mx-auto px-6 py-8">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Productos</h1>
-          <button className="flex items-center gap-2 bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg transition">
+          <h1 className="text-xl font-semibold text-ink tracking-tight">Productos</h1>
+          <button className="flex items-center gap-2 bg-accent hover:opacity-90 text-on-accent text-sm font-medium px-4 py-2 rounded-sm transition">
             <Plus className="w-4 h-4" />
             Nuevo producto
           </button>
         </div>
 
         {loading && (
-          <div className="flex items-center gap-2 text-gray-500">
+          <div className="flex items-center gap-2 text-ink-soft text-sm">
             <Loader2 className="w-4 h-4 animate-spin" />
             Cargando productos...
           </div>
         )}
 
         {error && (
-          <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+          <p className="text-sm text-error bg-error-soft border border-error/30 rounded-sm px-3 py-2">
             {error}
           </p>
         )}
 
         {!loading && !error && (
-          <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+          <div className="bg-surface border border-line rounded-md overflow-hidden">
             <table className="w-full text-sm text-left">
-              <thead className="bg-gray-100 text-gray-600 uppercase text-xs">
+              <thead className="text-ink-soft text-xs uppercase tracking-wide">
                 <tr>
-                  <th className="px-4 py-3">Imagen</th>
-                  <th className="px-4 py-3">Nombre</th>
-                  <th className="px-4 py-3">Categoría</th>
-                  <th className="px-4 py-3">Precio</th>
-                  <th className="px-4 py-3">Stock</th>
-                  <th className="px-4 py-3">Vence</th>
-                  <th className="px-4 py-3">Estado</th>
-                  <th className="px-4 py-3 text-right">Acciones</th>
+                  <th className="px-4 py-3 font-medium">Imagen</th>
+                  <th className="px-4 py-3 font-medium">Nombre</th>
+                  <th className="px-4 py-3 font-medium">Categoría</th>
+                  <th className="px-4 py-3 font-medium">Precio</th>
+                  <th className="px-4 py-3 font-medium">Stock</th>
+                  <th className="px-4 py-3 font-medium">Vence</th>
+                  <th className="px-4 py-3 font-medium">Estado</th>
+                  <th className="px-4 py-3 font-medium text-right">Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 {products.map((product) => (
-                  <tr key={product.id} className="border-t border-gray-100 hover:bg-gray-50">
+                  <tr key={product.id} className="border-t border-line hover:bg-surface-sunken/60">
                     <td className="px-4 py-3">
                       {product.image ? (
                         <img
                           src={product.image}
                           alt={product.name}
-                          className="w-12 h-12 object-cover rounded-lg"
+                          className="w-12 h-12 object-cover rounded-sm border border-line"
                         />
                       ) : (
-                        <div className="w-12 h-12 bg-gray-200 rounded-lg" />
+                        <div className="w-12 h-12 bg-surface-sunken rounded-sm border border-line" />
                       )}
                     </td>
-                    <td className="px-4 py-3 font-medium text-gray-800">{product.name}</td>
-                    <td className="px-4 py-3 text-gray-500">{product.category}</td>
+                    <td className="px-4 py-3 font-medium text-ink">{product.name}</td>
+                    <td className="px-4 py-3 text-ink-soft">{product.category}</td>
                     <td className="px-4 py-3">
                       {product.discount_price ? (
                         <div>
-                          <span className="line-through text-gray-400 text-xs mr-1">
+                          <span className="line-through text-ink-soft text-xs mr-1">
                             S/ {product.price}
                           </span>
-                          <span className="text-green-700 font-medium">
+                          <span className="text-deal font-medium">
                             S/ {product.discount_price}
                           </span>
                         </div>
                       ) : (
-                        <span className="text-gray-700">S/ {product.price}</span>
+                        <span className="text-ink">S/ {product.price}</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-gray-700">
+                    <td className="px-4 py-3 text-ink-soft">
                       {product.stock} {product.unit}
                     </td>
-                    <td className="px-4 py-3 text-gray-500">{product.expiration_date}</td>
                     <td className="px-4 py-3">
-                      <span
-                        className={`text-xs font-medium px-2 py-1 rounded-full ${
-                          product.is_active
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-gray-200 text-gray-500'
-                        }`}
-                      >
+                      <ExpiryLabel dateString={product.expiration_date} />
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-ink">
+                        <span
+                          className={`w-1.5 h-1.5 rounded-full ${
+                            product.is_active ? 'bg-accent' : 'bg-ink-soft'
+                          }`}
+                        />
                         {product.is_active ? 'Activo' : 'Inactivo'}
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <div className="flex justify-end gap-2">
-                        <button className="p-2 rounded-lg hover:bg-gray-100 text-gray-500">
+                      <div className="flex justify-end gap-1">
+                        <button className="p-2 rounded-sm hover:bg-surface-sunken text-ink-soft">
                           <Pencil className="w-4 h-4" />
                         </button>
-                        <button className="p-2 rounded-lg hover:bg-red-50 text-red-500">
+                        <button className="p-2 rounded-sm hover:bg-error-soft text-error">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
@@ -120,7 +162,7 @@ export default function ProductsPage() {
 
                 {products.length === 0 && (
                   <tr>
-                    <td colSpan={8} className="px-4 py-6 text-center text-gray-400">
+                    <td colSpan={8} className="px-4 py-6 text-center text-ink-soft">
                       No hay productos registrados.
                     </td>
                   </tr>
@@ -129,7 +171,7 @@ export default function ProductsPage() {
             </table>
           </div>
         )}
-      </div>
+      </main>
     </div>
   )
 }
