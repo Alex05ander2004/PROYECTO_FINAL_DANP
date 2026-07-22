@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Loader2 } from 'lucide-react'
+import { ChevronDown, Loader2, X } from 'lucide-react'
 import {
   createCategory,
   createProduct,
@@ -25,7 +25,60 @@ const EMPTY_FORM = {
 
 const inputClass =
   'w-full px-3 py-2 bg-transparent border border-line rounded-sm text-sm text-ink placeholder:text-ink-soft/70 focus:outline-none focus:border-accent'
+const selectClass =
+  'w-full appearance-none px-3 py-2 pr-9 bg-transparent border border-line rounded-sm text-sm text-ink focus:outline-none focus:border-accent'
 const labelClass = 'block text-xs font-medium text-ink-soft mb-1'
+
+// Bloquea teclas validas para <input type="number"> pero indeseadas aca
+// (+, -, e/E de notacion cientifica); el navegador las deja escribir aunque
+// min="0" solo se valida al enviar el formulario, no al tipear.
+function blockKeys(keys) {
+  return (e) => {
+    if (keys.includes(e.key)) e.preventDefault()
+  }
+}
+const blockIntegerKeys = blockKeys(['e', 'E', '+', '-', '.', ','])
+const blockDecimalKeys = blockKeys(['e', 'E', '+', '-'])
+
+function sanitizeInteger(value) {
+  return value.replace(/[^0-9]/g, '')
+}
+function sanitizeDecimal(value) {
+  const cleaned = value.replace(/[^0-9.]/g, '')
+  const firstDot = cleaned.indexOf('.')
+  if (firstDot === -1) return cleaned
+  return cleaned.slice(0, firstDot + 1) + cleaned.slice(firstDot + 1).replace(/\./g, '')
+}
+
+function validateForm(form, { isEditing, isNewCategory, newCategoryName, hasImage }) {
+  if (!form.name.trim()) return 'El nombre es obligatorio.'
+  if (isNewCategory && !newCategoryName.trim()) return 'Escribe el nombre de la nueva categoría.'
+  if (!isNewCategory && !form.category) return 'Selecciona una categoría.'
+
+  const price = Number(form.price)
+  if (form.price === '' || Number.isNaN(price) || price <= 0) {
+    return 'El precio debe ser un número mayor a 0.'
+  }
+
+  if (form.discount_percentage !== '') {
+    const discount = Number(form.discount_percentage)
+    if (Number.isNaN(discount) || discount < 0 || discount > 100) {
+      return 'El descuento debe ser un número entre 0 y 100.'
+    }
+  }
+
+  if (!form.unit.trim()) return 'La unidad / presentación es obligatoria.'
+
+  const stock = Number(form.stock)
+  if (form.stock === '' || Number.isNaN(stock) || stock < 0 || !Number.isInteger(stock)) {
+    return 'El stock debe ser un número entero mayor o igual a 0.'
+  }
+
+  if (!form.expiration_date) return 'La fecha de vencimiento es obligatoria.'
+  if (!isEditing && !hasImage) return 'Selecciona una imagen para el producto.'
+
+  return null
+}
 
 export default function ProductFormPage() {
   const { id } = useParams()
@@ -41,6 +94,12 @@ export default function ProductFormPage() {
   const [loading, setLoading] = useState(isEditing)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const fileInputRef = useRef(null)
+
+  function handleClearImage() {
+    setImageFile(null)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
 
   useEffect(() => {
     async function loadInitialData() {
@@ -82,24 +141,25 @@ export default function ProductFormPage() {
   async function handleSubmit(e) {
     e.preventDefault()
     setError('')
+
+    const validationError = validateForm(form, {
+      isEditing,
+      isNewCategory,
+      newCategoryName,
+      hasImage: Boolean(imageFile),
+    })
+    if (validationError) {
+      setError(validationError)
+      return
+    }
+
     setSaving(true)
 
     try {
       let categoryName = form.category
       if (isNewCategory) {
-        if (!newCategoryName.trim()) {
-          setError('Escribe el nombre de la nueva categoría.')
-          setSaving(false)
-          return
-        }
         const created = await createCategory(newCategoryName.trim())
         categoryName = created.name
-      }
-
-      if (!isEditing && !imageFile) {
-        setError('Selecciona una imagen para el producto.')
-        setSaving(false)
-        return
       }
 
       const payload = new FormData()
@@ -172,33 +232,36 @@ export default function ProductFormPage() {
             <div>
               <label className={labelClass}>Categoría</label>
               {!isNewCategory ? (
-                <select
-                  className={inputClass}
-                  value={form.category}
-                  onChange={(e) => {
-                    if (e.target.value === '__new__') {
-                      setIsNewCategory(true)
-                    } else {
-                      handleChange('category', e.target.value)
-                    }
-                  }}
-                >
-                  {categories.map((cat) => (
-                    <option
-                      key={cat.id}
-                      value={cat.name}
-                      style={{ backgroundColor: 'var(--color-surface)', color: 'var(--color-ink)' }}
-                    >
-                      {cat.name}
-                    </option>
-                  ))}
-                  <option
-                    value="__new__"
-                    style={{ backgroundColor: 'var(--color-surface)', color: 'var(--color-accent)' }}
+                <div className="relative">
+                  <select
+                    className={selectClass}
+                    value={form.category}
+                    onChange={(e) => {
+                      if (e.target.value === '__new__') {
+                        setIsNewCategory(true)
+                      } else {
+                        handleChange('category', e.target.value)
+                      }
+                    }}
                   >
-                    + Nueva categoría
-                  </option>
-                </select>
+                    {categories.map((cat) => (
+                      <option
+                        key={cat.id}
+                        value={cat.name}
+                        style={{ backgroundColor: 'var(--color-surface)', color: 'var(--color-ink)' }}
+                      >
+                        {cat.name}
+                      </option>
+                    ))}
+                    <option
+                      value="__new__"
+                      style={{ backgroundColor: 'var(--color-surface)', color: 'var(--color-accent)' }}
+                    >
+                      + Nueva categoría
+                    </option>
+                  </select>
+                  <ChevronDown className="w-4 h-4 text-ink-soft absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                </div>
               ) : (
                 <div className="flex gap-2">
                   <input
@@ -227,9 +290,11 @@ export default function ProductFormPage() {
                   type="number"
                   step="0.01"
                   min="0"
+                  inputMode="decimal"
                   className={inputClass}
                   value={form.price}
-                  onChange={(e) => handleChange('price', e.target.value)}
+                  onKeyDown={blockDecimalKeys}
+                  onChange={(e) => handleChange('price', sanitizeDecimal(e.target.value))}
                 />
               </div>
               <div>
@@ -238,9 +303,16 @@ export default function ProductFormPage() {
                   type="number"
                   min="0"
                   max="100"
+                  inputMode="numeric"
                   className={inputClass}
                   value={form.discount_percentage}
-                  onChange={(e) => handleChange('discount_percentage', e.target.value)}
+                  onKeyDown={blockIntegerKeys}
+                  onChange={(e) =>
+                    handleChange(
+                      'discount_percentage',
+                      sanitizeInteger(e.target.value).slice(0, 3)
+                    )
+                  }
                 />
               </div>
             </div>
@@ -262,9 +334,11 @@ export default function ProductFormPage() {
                   required
                   type="number"
                   min="0"
+                  inputMode="numeric"
                   className={inputClass}
                   value={form.stock}
-                  onChange={(e) => handleChange('stock', e.target.value)}
+                  onKeyDown={blockIntegerKeys}
+                  onChange={(e) => handleChange('stock', sanitizeInteger(e.target.value))}
                 />
               </div>
             </div>
@@ -289,11 +363,34 @@ export default function ProductFormPage() {
                   className="w-16 h-16 object-cover rounded-sm border border-line mb-2"
                 />
               )}
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="px-3 py-2 border border-line rounded-sm text-sm text-ink hover:bg-surface-sunken transition"
+                >
+                  {currentImageUrl || imageFile ? 'Cambiar imagen' : 'Seleccionar imagen'}
+                </button>
+                {imageFile && (
+                  <>
+                    <span className="text-xs text-ink-soft truncate max-w-[160px]">{imageFile.name}</span>
+                    <button
+                      type="button"
+                      onClick={handleClearImage}
+                      className="p-1.5 rounded-sm hover:bg-error-soft text-error"
+                      aria-label="Quitar imagen seleccionada"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </>
+                )}
+              </div>
               <input
+                ref={fileInputRef}
                 type="file"
                 accept="image/*"
                 onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
-                className="text-sm text-ink-soft"
+                className="hidden"
               />
             </div>
 

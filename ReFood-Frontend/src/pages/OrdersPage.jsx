@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Loader2 } from 'lucide-react'
+import { ChevronDown, Loader2 } from 'lucide-react'
 import { getOrders, updateOrderStatus } from '../api/orderService'
 import AdminHeader from '../components/AdminHeader'
 
@@ -136,22 +136,25 @@ export default function OrdersPage() {
                             className="w-1.5 h-1.5 rounded-full shrink-0"
                             style={{ backgroundColor: meta.color }}
                           />
-                          <select
-                            value={order.status}
-                            disabled={updatingId === order.id}
-                            onChange={(e) => handleStatusChange(order.id, e.target.value)}
-                            className="bg-transparent border border-line rounded-sm text-xs text-ink px-2 py-1.5 focus:outline-none focus:border-accent disabled:opacity-60"
-                          >
-                            {STATUS_OPTIONS.map((option) => (
-                              <option
-                                key={option.value}
-                                value={option.value}
-                                style={{ backgroundColor: 'var(--color-surface)', color: 'var(--color-ink)' }}
-                              >
-                                {option.label}
-                              </option>
-                            ))}
-                          </select>
+                          <div className="relative">
+                            <select
+                              value={order.status}
+                              disabled={updatingId === order.id}
+                              onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                              className="appearance-none bg-transparent border border-line rounded-sm text-xs text-ink pl-2 pr-7 py-1.5 focus:outline-none focus:border-accent disabled:opacity-60"
+                            >
+                              {STATUS_OPTIONS.map((option) => (
+                                <option
+                                  key={option.value}
+                                  value={option.value}
+                                  style={{ backgroundColor: 'var(--color-surface)', color: 'var(--color-ink)' }}
+                                >
+                                  {option.label}
+                                </option>
+                              ))}
+                            </select>
+                            <ChevronDown className="w-3.5 h-3.5 text-ink-soft absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                          </div>
                         </div>
                       </td>
                     </tr>
