@@ -43,12 +43,13 @@ class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ['id', 'user_email', 'user_name', 'status', 'delivery_address', 'payment_method', 'notes', 'total', 'created_at', 'items']
+        fields = ['id', 'user_email', 'user_name', 'status', 'delivery_address', 'payment_method', 'payment_reference', 'notes', 'total', 'created_at', 'items']
         read_only_fields = ['status', 'total']
 
 class CreateOrderSerializer(serializers.Serializer):
     delivery_address = serializers.CharField(max_length=255)
     payment_method = serializers.ChoiceField(choices=Order.PaymentMethod.choices)
+    payment_reference = serializers.CharField(max_length=20, required=False, allow_blank=True)
     notes = serializers.CharField(required=False, allow_blank=True)
 
     def create(self, validated_data):

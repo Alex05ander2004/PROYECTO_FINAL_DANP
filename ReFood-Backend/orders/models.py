@@ -21,6 +21,7 @@ class Order(models.Model):
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDIENTE)
     delivery_address = models.CharField(max_length=255)
     payment_method = models.CharField(max_length=20, choices=PaymentMethod.choices)
+    payment_reference = models.CharField(max_length=20, blank=True, null=True)
     notes = models.TextField(blank=True)
     total = models.DecimalField(max_digits=8, decimal_places=2)
 
