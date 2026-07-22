@@ -143,7 +143,11 @@ export default function OrdersPage() {
                             className="bg-transparent border border-line rounded-sm text-xs text-ink px-2 py-1.5 focus:outline-none focus:border-accent disabled:opacity-60"
                           >
                             {STATUS_OPTIONS.map((option) => (
-                              <option key={option.value} value={option.value}>
+                              <option
+                                key={option.value}
+                                value={option.value}
+                                style={{ backgroundColor: 'var(--color-surface)', color: 'var(--color-ink)' }}
+                              >
                                 {option.label}
                               </option>
                             ))}

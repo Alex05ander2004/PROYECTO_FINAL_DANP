@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Pencil, Trash2, Plus, Loader2 } from 'lucide-react'
-import { getProducts } from '../api/productService'
+import { deleteProduct, getProducts } from '../api/productService'
 import AdminHeader from '../components/AdminHeader'
 
 function daysUntil(dateString) {
@@ -24,6 +25,7 @@ export default function ProductsPage() {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const navigate = useNavigate()
 
   useEffect(() => {
     async function fetchProducts() {
@@ -39,6 +41,18 @@ export default function ProductsPage() {
     fetchProducts()
   }, [])
 
+  async function handleDelete(product) {
+    if (!window.confirm(`¿Eliminar "${product.name}"? Esta acción no se puede deshacer.`)) {
+      return
+    }
+    try {
+      await deleteProduct(product.id)
+      setProducts((current) => current.filter((p) => p.id !== product.id))
+    } catch {
+      setError('No se pudo eliminar el producto.')
+    }
+  }
+
   return (
     <div className="min-h-screen bg-paper">
       <AdminHeader />
@@ -46,7 +60,10 @@ export default function ProductsPage() {
       <main className="max-w-6xl mx-auto px-6 py-8">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-xl font-semibold text-ink tracking-tight">Productos</h1>
-          <button className="flex items-center gap-2 bg-accent hover:opacity-90 text-on-accent text-sm font-medium px-4 py-2 rounded-sm transition">
+          <button
+            onClick={() => navigate('/products/new')}
+            className="flex items-center gap-2 bg-accent hover:opacity-90 text-on-accent text-sm font-medium px-4 py-2 rounded-sm transition"
+          >
             <Plus className="w-4 h-4" />
             Nuevo producto
           </button>
@@ -128,10 +145,16 @@ export default function ProductsPage() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex justify-end gap-1">
-                        <button className="p-2 rounded-sm hover:bg-surface-sunken text-ink-soft">
+                        <button
+                          onClick={() => navigate(`/products/${product.id}/edit`)}
+                          className="p-2 rounded-sm hover:bg-surface-sunken text-ink-soft"
+                        >
                           <Pencil className="w-4 h-4" />
                         </button>
-                        <button className="p-2 rounded-sm hover:bg-error-soft text-error">
+                        <button
+                          onClick={() => handleDelete(product)}
+                          className="p-2 rounded-sm hover:bg-error-soft text-error"
+                        >
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
