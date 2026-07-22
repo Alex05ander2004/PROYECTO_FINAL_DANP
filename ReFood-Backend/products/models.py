@@ -30,6 +30,9 @@ class Product(models.Model):
     is_active = models.BooleanField(default=True)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='products_created')
     created_at = models.DateTimeField(auto_now_add=True)
+    # Ultimo umbral de dias-para-vencer (30/7/2) que ya subio el descuento y
+    # disparo la notificacion push, para no repetirla en cada corrida del job.
+    last_discount_threshold = models.PositiveIntegerField(null=True, blank=True)
 
     class Meta:
         verbose_name = 'Producto'

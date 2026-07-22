@@ -99,6 +99,37 @@ probar desde un celular conectado a la misma WiFi:
 Si usas el emulador de Android Studio (no un celular físico), no hace falta
 nada de esto: el alias `10.0.2.2` ya apunta al `localhost` de tu PC.
 
+## Notificaciones de vencimiento (Firebase)
+
+Cuando a un producto le queda poco tiempo, un comando sube su descuento
+automáticamente y envía una notificación push a los usuarios registrados:
+
+| Días restantes | Descuento mínimo |
+|---|---|
+| ≤ 30 | 20% |
+| ≤ 7 | 40% |
+| ≤ 2 | 60% |
+
+Requiere el archivo de credenciales de Firebase Admin (`secrets/firebase-adminsdk.json`,
+**nunca se sube a git**) y `FIREBASE_CREDENTIALS_PATH` en tu `.env` si lo guardaste
+en otra ruta.
+
+Para probarlo manualmente:
+```bash
+python manage.py check_expiring_products
+```
+
+Como el proyecto no usa Celery, este comando debe programarse para correr una
+vez al día:
+
+- **Windows**: Programador de tareas → crear tarea básica → acción
+  "Iniciar un programa" → apuntar al `python.exe` del `venv` con el argumento
+  `manage.py check_expiring_products` y "Iniciar en" la carpeta del proyecto.
+- **Linux/Mac**: agregar una línea a `crontab -e`, ej. todos los días a las 8am:
+  ```
+  0 8 * * * cd /ruta/a/ReFood-Backend && venv/bin/python manage.py check_expiring_products
+  ```
+
 ## Endpoints principales
 
 | Función | Endpoint | Método |

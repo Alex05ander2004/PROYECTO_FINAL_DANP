@@ -151,6 +151,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# Firebase Admin SDK (notificaciones push). Archivo de credenciales, nunca
+# subir a git (ver .gitignore).
+FIREBASE_CREDENTIALS_PATH = str(BASE_DIR / config('FIREBASE_CREDENTIALS_PATH', default='secrets/firebase-adminsdk.json'))
+
 # Rest Framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
