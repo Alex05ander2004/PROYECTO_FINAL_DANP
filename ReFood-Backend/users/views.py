@@ -1,5 +1,7 @@
 from rest_framework import generics, permissions, viewsets
 from rest_framework.response import Response
+from rest_framework.throttling import ScopedRateThrottle
+from rest_framework_simplejwt.views import TokenObtainPairView
 from core.permissions import IsAdmin
 from .models import User
 from .serializers import UserSerializer, RegisterSerializer, AdminUserSerializer
@@ -9,6 +11,12 @@ class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = RegisterSerializer
     permission_classes = [permissions.AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'register'
+
+class ThrottledTokenObtainPairView(TokenObtainPairView):
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'login'
 
 class MeView(generics.RetrieveUpdateAPIView):
     serializer_class = UserSerializer

@@ -79,8 +79,7 @@ Te pedirá **email**, **name** y **password**.
 python manage.py runserver
 ```
 
-- Panel de administración: `http://127.0.0.1:8000/admin/`
-- Vista pública de productos: `http://127.0.0.1:8000/`
+- Panel de administración de Django: `http://127.0.0.1:8000/admin/`
 - API: `http://127.0.0.1:8000/api/`
 
 ### Probar desde un celular físico (app Android)
@@ -120,11 +119,19 @@ python manage.py check_expiring_products
 ```
 
 Como el proyecto no usa Celery, este comando debe programarse para correr una
-vez al día:
+vez al día **en cada máquina donde corra el backend** (el Programador de
+tareas/cron es local al sistema operativo, no se sincroniza vía git):
 
-- **Windows**: Programador de tareas → crear tarea básica → acción
-  "Iniciar un programa" → apuntar al `python.exe` del `venv` con el argumento
-  `manage.py check_expiring_products` y "Iniciar en" la carpeta del proyecto.
+- **Windows** (PowerShell, como administrador si hace falta):
+  ```powershell
+  $action = New-ScheduledTaskAction -Execute "C:\ruta\a\ReFood-Backend\venv\Scripts\python.exe" -Argument "manage.py check_expiring_products" -WorkingDirectory "C:\ruta\a\ReFood-Backend"
+  $trigger = New-ScheduledTaskTrigger -Daily -At 8:00AM
+  Register-ScheduledTask -TaskName "ReFood_CheckExpiringProducts" -Action $action -Trigger $trigger -Description "Sube descuentos y envia notificaciones push para productos proximos a vencer."
+  ```
+  (o lo mismo desde la interfaz: Programador de tareas → crear tarea básica →
+  acción "Iniciar un programa" → apuntar al `python.exe` del `venv` con el
+  argumento `manage.py check_expiring_products` y "Iniciar en" la carpeta del
+  proyecto.)
 - **Linux/Mac**: agregar una línea a `crontab -e`, ej. todos los días a las 8am:
   ```
   0 8 * * * cd /ruta/a/ReFood-Backend && venv/bin/python manage.py check_expiring_products
@@ -138,17 +145,32 @@ vez al día:
 | Login (app) | `/api/auth/login/` | POST |
 | Refrescar token | `/api/auth/refresh/` | POST |
 | Perfil propio | `/api/auth/me/` | GET/PATCH |
-| Listar productos | `/api/products/` | GET |
+| Listar/editar usuarios (solo admin) | `/api/auth/users/` | GET, `/api/auth/users/{id}/` PATCH |
+| Listar/crear productos (crear/editar/borrar solo admin) | `/api/products/` | GET/POST, `/api/products/{id}/` PATCH/DELETE |
 | Listar categorías | `/api/products/categories/` | GET |
-| Ver carrito | `/api/orders/cart/` | GET |
-| Agregar al carrito | `/api/orders/cart/` | POST |
+| Ver/agregar al carrito | `/api/orders/cart/` | GET/POST, `/api/orders/cart/{id}/` PATCH/DELETE |
 | Confirmar pedido | `/api/orders/checkout/` | POST |
-| Mis pedidos | `/api/orders/` | GET |
+| Mis pedidos (admin ve todos, cambia estado) | `/api/orders/` | GET, `/api/orders/{id}/` PATCH (solo admin) |
 
 Todos los endpoints (excepto registro/login) requieren el header:
 ```
 Authorization: Bearer <access_token>
 ```
+
+`login/`, `register/` y el resto de la API tienen límite de peticiones
+(throttling) para evitar fuerza bruta — ver `DEFAULT_THROTTLE_RATES` en
+`config/settings.py`.
+
+## Tests
+
+```bash
+python manage.py test
+```
+
+Corre contra una base SQLite en memoria (no toca la base de Postgres real ni
+requiere permisos extra). Cubre autenticación, permisos por rol (cliente vs.
+administrador), carrito/checkout (incluida validación de stock) y el comando
+`check_expiring_products`.
 
 ## Notas
 

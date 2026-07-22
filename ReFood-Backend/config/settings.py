@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import sys
 from pathlib import Path
 from decouple import config
 from datetime import timedelta
@@ -106,6 +107,15 @@ DATABASES = {
     }
 }
 
+# Los tests usan SQLite en memoria en vez de Postgres: más rápido y evita
+# depender de que el usuario de la BD tenga permiso CREATEDB solo para correr
+# `manage.py test`. No afecta al servidor real (runserver sigue usando Postgres).
+if 'test' in sys.argv:
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': ':memory:',
+    }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -163,6 +173,19 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+        'rest_framework.throttling.ScopedRateThrottle',
+    ],
+    # 'login'/'register' solo se aplican en las vistas que declaran
+    # throttle_scope (ver users/views.py) - protege contra fuerza bruta.
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '100/hour',
+        'user': '1000/hour',
+        'login': '10/min',
+        'register': '5/min',
+    },
 }
 
 SIMPLE_JWT = {
@@ -171,4 +194,11 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,
 }
 
-CORS_ALLOW_ALL_ORIGINS = True
+# Origenes permitidos para peticiones desde el navegador (CORS). No afecta a
+# la app Android (OkHttp no aplica CORS, eso solo lo hacen los navegadores).
+# Configurable desde .env para producción, mismo patrón que ALLOWED_HOSTS.
+CORS_ALLOWED_ORIGINS = config(
+    'CORS_ALLOWED_ORIGINS',
+    default='http://localhost:5173,http://127.0.0.1:5173',
+    cast=lambda v: [origin.strip() for origin in v.split(',') if origin.strip()]
+)
