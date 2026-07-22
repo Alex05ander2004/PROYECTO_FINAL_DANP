@@ -14,3 +14,6 @@
 .cxx
 local.properties
 .kotlin
+
+# Credenciales de Firebase (cada dev descarga la suya desde Firebase Console)
+app/google-services.json
