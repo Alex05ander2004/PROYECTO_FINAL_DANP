@@ -83,6 +83,7 @@ class RemoteAuthRepositoryImpl(
         is HttpException -> when (code()) {
             401 -> IllegalArgumentException("Correo o contraseña incorrectos.")
             400 -> IllegalArgumentException("Ya existe una cuenta con ese correo, o los datos no son válidos.")
+            429 -> IllegalStateException("Demasiados intentos. Espera un momento e intenta de nuevo.")
             else -> IllegalStateException("No se pudo conectar con el servidor (código ${code()}).")
         }
         else -> IllegalStateException("No se pudo conectar con el servidor. Revisa tu conexión.")
