@@ -27,7 +27,14 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default = False, cast = bool)
 
-ALLOWED_HOSTS = []
+# En .env: lista separada por comas. Debe incluir la IP de red local de la
+# maquina que corre el servidor (ej. 192.168.1.X) para poder probar desde un
+# celular fisico conectado a la misma WiFi, ademas de localhost/127.0.0.1.
+ALLOWED_HOSTS = config(
+    'ALLOWED_HOSTS',
+    default='localhost,127.0.0.1',
+    cast=lambda v: [host.strip() for host in v.split(',') if host.strip()]
+)
 
 
 # Application definition

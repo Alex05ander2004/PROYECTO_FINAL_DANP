@@ -83,6 +83,22 @@ python manage.py runserver
 - Vista pública de productos: `http://127.0.0.1:8000/`
 - API: `http://127.0.0.1:8000/api/`
 
+### Probar desde un celular físico (app Android)
+
+`127.0.0.1`/`localhost` solo funciona si el cliente corre en la misma PC. Para
+probar desde un celular conectado a la misma WiFi:
+
+1. Agrega tu IP de red local a `ALLOWED_HOSTS` en tu `.env` (ver `.env.example`).
+   Consíguela con `ipconfig` (Windows) o `ifconfig`/`ip addr` (Linux/Mac).
+2. Levanta el servidor escuchando en todas las interfaces, no solo localhost:
+   ```bash
+   python manage.py runserver 0.0.0.0:8000
+   ```
+3. En la app, usa `http://<tu-ip-de-red>:8000/` como URL base.
+
+Si usas el emulador de Android Studio (no un celular físico), no hace falta
+nada de esto: el alias `10.0.2.2` ya apunta al `localhost` de tu PC.
+
 ## Endpoints principales
 
 | Función | Endpoint | Método |
