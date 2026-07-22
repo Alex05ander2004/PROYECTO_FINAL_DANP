@@ -1,5 +1,3 @@
-from django.views.generic import ListView
-from django.shortcuts import render
 from rest_framework import viewsets, permissions
 from .models import Category, Product
 from .serializers import CategorySerializer, ProductSerializer
@@ -42,12 +40,3 @@ class ProductViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
-
-# Vista genérica de lista de productos para la página principal
-class ProductIndexView(ListView):
-    model = Product
-    template_name = 'products/index.html'
-    context_object_name = 'products'
-
-    def get_queryset(self):
-        return Product.objects.filter(is_active=True).select_related('category')

@@ -18,10 +18,8 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from products.views import ProductIndexView
 
 urlpatterns = [
-    path('', ProductIndexView.as_view()),
     path('admin/', admin.site.urls),
     path('api/auth/', include('users.urls')),
     path('api/products/', include('products.urls')),
