@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Pencil, Trash2, Plus, Loader2, LogOut, Leaf } from 'lucide-react'
+import { Pencil, Trash2, Plus, Loader2 } from 'lucide-react'
 import { getProducts } from '../api/productService'
+import AdminHeader from '../components/AdminHeader'
 
 function daysUntil(dateString) {
   const target = new Date(`${dateString}T00:00:00`)
@@ -24,7 +24,6 @@ export default function ProductsPage() {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const navigate = useNavigate()
 
   useEffect(() => {
     async function fetchProducts() {
@@ -40,29 +39,9 @@ export default function ProductsPage() {
     fetchProducts()
   }, [])
 
-  function handleLogout() {
-    localStorage.removeItem('access_token')
-    localStorage.removeItem('refresh_token')
-    navigate('/login')
-  }
-
   return (
     <div className="min-h-screen bg-paper">
-      <header className="border-b border-line bg-surface">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Leaf className="w-5 h-5 text-accent" />
-            <span className="font-semibold text-ink tracking-tight">ReFood — Admin</span>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-1.5 text-sm text-ink-soft hover:text-ink transition"
-          >
-            <LogOut className="w-4 h-4" />
-            Cerrar sesión
-          </button>
-        </div>
-      </header>
+      <AdminHeader />
 
       <main className="max-w-6xl mx-auto px-6 py-8">
         <div className="flex items-center justify-between mb-6">
