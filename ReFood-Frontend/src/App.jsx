@@ -3,6 +3,7 @@ import LoginPage from './pages/LoginPage'
 import ProductsPage from './pages/ProductsPage'
 import ProductFormPage from './pages/ProductFormPage'
 import OrdersPage from './pages/OrdersPage'
+import UsersPage from './pages/UsersPage'
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path="/products/new" element={<ProductFormPage />} />
         <Route path="/products/:id/edit" element={<ProductFormPage />} />
         <Route path="/orders" element={<OrdersPage />} />
+        <Route path="/users" element={<UsersPage />} />
       </Routes>
     </BrowserRouter>
   )

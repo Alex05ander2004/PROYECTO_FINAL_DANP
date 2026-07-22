@@ -4,6 +4,7 @@ import { LogOut, Leaf } from 'lucide-react'
 const NAV_LINKS = [
   { to: '/dashboard', label: 'Productos' },
   { to: '/orders', label: 'Pedidos' },
+  { to: '/users', label: 'Usuarios' },
 ]
 
 export default function AdminHeader() {
