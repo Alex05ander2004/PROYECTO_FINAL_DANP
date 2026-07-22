@@ -13,6 +13,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -105,7 +106,8 @@ class OrderFormViewModel(
             errorMessage = form.error,
             placedOrderId = form.orderId
         )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), OrderFormUiState())
+    }.catch { emit(OrderFormUiState(isLoading = false, errorMessage = "No se pudo conectar con el servidor.")) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), OrderFormUiState())
 
     fun onAddressChange(value: String) {
         deliveryAddress.value = value

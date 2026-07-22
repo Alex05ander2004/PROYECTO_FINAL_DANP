@@ -1,11 +1,8 @@
 package com.example.refood.data.repository
 
-import com.example.refood.data.local.dao.UserDao
-import com.example.refood.data.local.entity.UserEntity
 import com.example.refood.data.remote.AuthApi
 import com.example.refood.data.remote.dto.LoginRequest
 import com.example.refood.data.remote.dto.RegisterRequest
-import com.example.refood.data.remote.dto.UserDto
 import com.example.refood.data.session.SessionManager
 import com.example.refood.domain.model.User
 import com.google.firebase.messaging.FirebaseMessaging
@@ -15,15 +12,9 @@ import retrofit2.HttpException
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
-/**
- * Auth real contra el backend Django. Productos/Carrito/Pedidos siguen en
- * Room local (ver plan), por eso cada login/registro hace un "upsert" del
- * usuario en la tabla local `users`: CartItemEntity/OrderEntity tienen FK a
- * ese id, y necesitan una fila local para seguir funcionando.
- */
+/** Auth real contra el backend Django. El perfil se cachea en DataStore (SessionManager) */
 class RemoteAuthRepositoryImpl(
     private val authApi: AuthApi,
-    private val userDao: UserDao,
     private val sessionManager: SessionManager
 ) : AuthRepository {
 
@@ -52,7 +43,7 @@ class RemoteAuthRepositoryImpl(
         val tokens = authApi.login(LoginRequest(email, password))
         sessionManager.setTokens(tokens.access, tokens.refresh)
         val me = authApi.getMe()
-        upsertLocalUser(me)
+        sessionManager.cacheUserProfile(me.name, me.email, me.phone, me.address)
         sessionManager.setLoggedInUser(me.id)
         registerFcmTokenBestEffort()
         return me.id
@@ -62,32 +53,17 @@ class RemoteAuthRepositoryImpl(
         sessionManager.clearSession()
     }
 
-    override suspend fun getUser(userId: Long): User? = userDao.getById(userId)?.toDomain()
+    override suspend fun getUser(userId: Long): User? {
+        val cached = sessionManager.getCachedUserProfile() ?: return null
+        return User(id = userId, name = cached.name, email = cached.email, phone = cached.phone, address = cached.address)
+    }
 
     override suspend fun updateUser(user: User): Result<Unit> = try {
         authApi.updateMe(mapOf("name" to user.name, "phone" to user.phone, "address" to user.address))
-        val existing = userDao.getById(user.id)
-        if (existing != null) {
-            userDao.update(existing.copy(name = user.name, phone = user.phone, address = user.address))
-        }
+        sessionManager.cacheUserProfile(user.name, user.email, user.phone, user.address)
         Result.success(Unit)
     } catch (e: Exception) {
         Result.failure(e.toFriendlyError())
-    }
-
-    private suspend fun upsertLocalUser(dto: UserDto) {
-        val existing = userDao.getById(dto.id)
-        val entity = UserEntity(
-            id = dto.id,
-            name = dto.name,
-            email = dto.email,
-            // La contraseña real la valida el backend; no se guarda nada local.
-            passwordHash = "REMOTE_AUTH",
-            phone = dto.phone,
-            address = dto.address,
-            createdAt = existing?.createdAt ?: System.currentTimeMillis()
-        )
-        if (existing != null) userDao.update(entity) else userDao.insert(entity)
     }
 
     private suspend fun registerFcmTokenBestEffort() {
@@ -102,8 +78,6 @@ class RemoteAuthRepositoryImpl(
             .addOnSuccessListener { token -> continuation.resume(token) }
             .addOnFailureListener { error -> continuation.resumeWithException(error) }
     }
-
-    private fun UserEntity.toDomain() = User(id = id, name = name, email = email, phone = phone, address = address)
 
     private fun Exception.toFriendlyError(): Exception = when (this) {
         is HttpException -> when (code()) {

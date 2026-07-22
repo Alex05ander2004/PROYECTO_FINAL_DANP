@@ -14,6 +14,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -27,7 +28,8 @@ data class ProductDetailUiState(
     val quantity: Int = 1,
     val cartCount: Int = 0,
     val isLoading: Boolean = true,
-    val addedToCart: Boolean = false
+    val addedToCart: Boolean = false,
+    val errorMessage: String? = null
 )
 
 class ProductDetailViewModel(
@@ -58,6 +60,8 @@ class ProductDetailViewModel(
             isLoading = product == null,
             addedToCart = added
         )
+    }.catch {
+        emit(ProductDetailUiState(isLoading = false, errorMessage = "No se pudo conectar con el servidor."))
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ProductDetailUiState())
 
     fun incrementQuantity() {

@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.WifiOff
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -20,6 +22,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.refood.ui.components.EmptyState
 import com.example.refood.ui.components.LoadingIndicator
 import com.example.refood.ui.components.ProductCard
 import com.example.refood.ui.components.ReFoodTopBar
@@ -45,6 +48,15 @@ fun HomeScreen(
     ) { padding ->
         if (uiState.isLoading) {
             LoadingIndicator(modifier = Modifier.padding(padding))
+            return@Scaffold
+        }
+        if (uiState.errorMessage != null) {
+            EmptyState(
+                title = "Sin conexión",
+                message = uiState.errorMessage!!,
+                icon = Icons.Outlined.WifiOff,
+                modifier = Modifier.padding(padding)
+            )
             return@Scaffold
         }
         LazyColumn(

@@ -25,7 +25,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.WifiOff
 import coil.compose.AsyncImage
+import com.example.refood.ui.components.EmptyState
 import com.example.refood.ui.components.ExpiryLabel
 import com.example.refood.ui.components.LoadingIndicator
 import com.example.refood.ui.components.OfferBadge
@@ -61,6 +64,15 @@ fun ProductDetailScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         val product = uiState.product
+        if (uiState.errorMessage != null) {
+            EmptyState(
+                title = "Sin conexión",
+                message = uiState.errorMessage!!,
+                icon = Icons.Outlined.WifiOff,
+                modifier = Modifier.padding(padding)
+            )
+            return@Scaffold
+        }
         if (uiState.isLoading || product == null) {
             LoadingIndicator(modifier = Modifier.padding(padding))
             return@Scaffold

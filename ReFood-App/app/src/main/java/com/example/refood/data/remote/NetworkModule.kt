@@ -78,4 +78,7 @@ class NetworkModule(private val sessionManager: SessionManager) {
         .build()
 
     val authApi: AuthApi = retrofit.create(AuthApi::class.java)
+    val productApi: ProductApi = retrofit.create(ProductApi::class.java)
+    val cartApi: CartApi = retrofit.create(CartApi::class.java)
+    val orderApi: OrderApi = retrofit.create(OrderApi::class.java)
 }

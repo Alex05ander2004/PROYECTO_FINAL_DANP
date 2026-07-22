@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
@@ -24,7 +25,8 @@ data class ProductsUiState(
     val categories: List<String> = emptyList(),
     val products: List<Product> = emptyList(),
     val cartCount: Int = 0,
-    val isLoading: Boolean = true
+    val isLoading: Boolean = true,
+    val errorMessage: String? = null
 )
 
 class ProductsViewModel(
@@ -57,7 +59,8 @@ class ProductsViewModel(
             cartCount = cartCount,
             isLoading = false
         )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ProductsUiState())
+    }.catch { emit(ProductsUiState(isLoading = false, errorMessage = "No se pudo conectar con el servidor.")) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ProductsUiState())
 
     fun onQueryChange(value: String) {
         query.value = value

@@ -11,6 +11,7 @@ import com.example.refood.domain.model.Product
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
@@ -19,7 +20,8 @@ import kotlinx.coroutines.flow.stateIn
 data class SpecialOffersUiState(
     val offers: List<Product> = emptyList(),
     val cartCount: Int = 0,
-    val isLoading: Boolean = true
+    val isLoading: Boolean = true,
+    val errorMessage: String? = null
 )
 
 class SpecialOffersViewModel(
@@ -36,5 +38,6 @@ class SpecialOffersViewModel(
         cartCountFlow
     ) { offers, cartCount ->
         SpecialOffersUiState(offers = offers, cartCount = cartCount, isLoading = false)
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), SpecialOffersUiState())
+    }.catch { emit(SpecialOffersUiState(isLoading = false, errorMessage = "No se pudo conectar con el servidor.")) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), SpecialOffersUiState())
 }

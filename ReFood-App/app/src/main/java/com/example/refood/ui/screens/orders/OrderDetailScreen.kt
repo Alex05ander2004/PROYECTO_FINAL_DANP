@@ -19,7 +19,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.WifiOff
 import androidx.compose.ui.unit.dp
+import com.example.refood.ui.components.EmptyState
 import com.example.refood.ui.components.LoadingIndicator
 import com.example.refood.ui.components.ReFoodTopBar
 import com.example.refood.ui.components.StatusChip
@@ -39,6 +42,15 @@ fun OrderDetailScreen(
         topBar = { ReFoodTopBar(title = "Detalle del pedido", onBack = onBack) }
     ) { padding ->
         val order = uiState.order
+        if (uiState.errorMessage != null) {
+            EmptyState(
+                title = "Sin conexión",
+                message = uiState.errorMessage!!,
+                icon = Icons.Outlined.WifiOff,
+                modifier = Modifier.padding(padding)
+            )
+            return@Scaffold
+        }
         if (uiState.isLoading || order == null) {
             LoadingIndicator(modifier = Modifier.padding(padding))
             return@Scaffold

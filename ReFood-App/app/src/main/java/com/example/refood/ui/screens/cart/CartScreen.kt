@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.DeleteOutline
+import androidx.compose.material.icons.outlined.WifiOff
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -70,6 +71,12 @@ fun CartScreen(
     ) { padding ->
         when {
             uiState.isLoading -> LoadingIndicator(modifier = Modifier.padding(padding))
+            uiState.errorMessage != null -> EmptyState(
+                title = "Sin conexión",
+                message = uiState.errorMessage!!,
+                icon = Icons.Outlined.WifiOff,
+                modifier = Modifier.padding(padding)
+            )
             uiState.lines.isEmpty() -> EmptyState(
                 title = "Tu carrito está vacío",
                 message = "Explora los productos y ofertas especiales para empezar a ahorrar.",

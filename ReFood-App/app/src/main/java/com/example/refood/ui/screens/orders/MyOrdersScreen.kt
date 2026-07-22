@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.WifiOff
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -41,6 +43,12 @@ fun MyOrdersScreen(
     ) { padding ->
         when {
             uiState.isLoading -> LoadingIndicator(modifier = Modifier.padding(padding))
+            uiState.errorMessage != null -> EmptyState(
+                title = "Sin conexión",
+                message = uiState.errorMessage!!,
+                icon = Icons.Outlined.WifiOff,
+                modifier = Modifier.padding(padding)
+            )
             uiState.orders.isEmpty() -> EmptyState(
                 title = "Aún no tienes pedidos",
                 message = "Cuando hagas tu primer pedido, lo verás reflejado aquí.",

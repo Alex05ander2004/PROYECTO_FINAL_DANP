@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.WifiOff
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -36,6 +38,15 @@ fun SpecialOffersScreen(
     ) { padding ->
         if (uiState.isLoading) {
             LoadingIndicator(modifier = Modifier.padding(padding))
+            return@Scaffold
+        }
+        if (uiState.errorMessage != null) {
+            EmptyState(
+                title = "Sin conexión",
+                message = uiState.errorMessage!!,
+                icon = Icons.Outlined.WifiOff,
+                modifier = Modifier.padding(padding)
+            )
             return@Scaffold
         }
         if (uiState.offers.isEmpty()) {

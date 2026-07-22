@@ -10,6 +10,7 @@ import com.example.refood.domain.model.CartLine
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
@@ -19,7 +20,8 @@ import kotlinx.coroutines.launch
 data class CartUiState(
     val lines: List<CartLine> = emptyList(),
     val total: Double = 0.0,
-    val isLoading: Boolean = true
+    val isLoading: Boolean = true,
+    val errorMessage: String? = null
 )
 
 class CartViewModel(
@@ -32,6 +34,7 @@ class CartViewModel(
     val uiState: StateFlow<CartUiState> = userIdFlow
         .flatMapLatest { userId -> cartRepository.observeCart(userId) }
         .map { lines -> CartUiState(lines = lines, total = lines.sumOf { it.lineTotal }, isLoading = false) }
+        .catch { emit(CartUiState(isLoading = false, errorMessage = "No se pudo conectar con el servidor.")) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), CartUiState())
 
     fun increment(line: CartLine) {
