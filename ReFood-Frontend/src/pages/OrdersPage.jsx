@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, Clock, ChefHat, CheckCircle2, Truck, XCircle, Hourglass } from 'lucide-react'
 import { getOrders, updateOrderStatus } from '../api/orderService'
 import AdminHeader from '../components/AdminHeader'
 import TableSkeleton from '../components/TableSkeleton'
 
 const STATUS_OPTIONS = [
-  { value: 'PENDIENTE', label: 'Pendiente', color: 'var(--color-status-pending)' },
-  { value: 'EN_PREPARACION', label: 'En preparación', color: 'var(--color-status-preparing)' },
-  { value: 'LISTO', label: 'Listo para entrega', color: 'var(--color-status-ready)' },
-  { value: 'ENTREGADO', label: 'Entregado', color: 'var(--color-status-delivered)' },
-  { value: 'CANCELADO', label: 'Cancelado', color: 'var(--color-status-cancelled)' },
+  { value: 'PENDIENTE', label: 'Pendiente', color: 'var(--color-status-pending)', icon: Clock },
+  { value: 'EN_PREPARACION', label: 'En preparación', color: 'var(--color-status-preparing)', icon: Hourglass },
+  { value: 'LISTO', label: 'Listo para entrega', color: 'var(--color-status-ready)', icon: CheckCircle2 },
+  { value: 'ENTREGADO', label: 'Entregado', color: 'var(--color-status-delivered)', icon: Truck },
+  { value: 'CANCELADO', label: 'Cancelado', color: 'var(--color-status-cancelled)', icon: XCircle },
 ]
 
 const PAYMENT_LABELS = {
@@ -132,10 +132,12 @@ export default function OrdersPage() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
-                          <span
-                            className="w-1.5 h-1.5 rounded-full shrink-0"
-                            style={{ backgroundColor: meta.color }}
-                          />
+                          {meta.icon && (
+                            <meta.icon
+                              className="w-4 h-4 shrink-0"
+                              style={{ color: meta.color }}
+                            />
+                          )}
                           <div className="relative">
                             <select
                               value={order.status}

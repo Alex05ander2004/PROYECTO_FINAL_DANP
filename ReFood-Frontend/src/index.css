@@ -10,8 +10,8 @@
   --color-surface: #ffffff;
   --color-surface-sunken: #eff1ea;
   --color-line: #e1e4dc;
-  --color-accent: #1f5c3a;
-  --color-accent-soft: #e7efe8;
+  --color-accent: #16a34a; /* Tailwind Green 600 - más vibrante y distinguible */
+  --color-accent-soft: #dcfce7;
   --color-on-accent: #ffffff;
   --color-deal: #93552f;
   --color-deal-soft: #f5e9e1;

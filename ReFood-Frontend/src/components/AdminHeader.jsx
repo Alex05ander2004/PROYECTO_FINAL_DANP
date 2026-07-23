@@ -31,8 +31,10 @@ export default function AdminHeader() {
                 key={link.to}
                 to={link.to}
                 className={({ isActive }) =>
-                  `text-sm font-medium transition ${
-                    isActive ? 'text-accent' : 'text-ink-soft hover:text-ink'
+                  `text-sm font-medium px-3 py-1.5 rounded-md transition-all duration-200 ${
+                    isActive
+                      ? 'bg-accent/10 text-accent dark:bg-accent/20'
+                      : 'text-ink-soft hover:bg-surface-sunken hover:text-ink'
                   }`
                 }
               >
