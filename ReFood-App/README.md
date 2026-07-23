@@ -4,13 +4,10 @@
 ![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-Material%203-4285F4?logo=jetpackcompose&logoColor=white)
 ![Android](https://img.shields.io/badge/Android-API%2024%2B-3DDC84?logo=android&logoColor=white)
 ![Architecture](https://img.shields.io/badge/Arquitectura-MVVM-orange)
-![Status](https://img.shields.io/badge/Estado-En%20desarrollo-yellow)
 
 **ReFood** es una solución tecnológica que conecta **clientes** y **administradores** para reducir el desperdicio de alimentos, permitiendo publicar y adquirir productos próximos a vencer o excedentes de comida a precios accesibles.
 
-Esta rama (`Willy-ReFood_Movil`) contiene la **aplicación Android de Clientes**, desarrollada en Kotlin con Jetpack Compose y arquitectura MVVM.
-
-> La web de Administradores se desarrolla en paralelo por otro integrante del equipo (rama `Marco-ReFood_Web`).
+Esta carpeta contiene la **aplicación Android de Clientes**, desarrollada en Kotlin con Jetpack Compose y arquitectura MVVM, consumiendo la API REST del backend Django compartida con el panel de administración.
 
 ---
 
@@ -18,36 +15,46 @@ Esta rama (`Willy-ReFood_Movil`) contiene la **aplicación Android de Clientes**
 
 | Módulo | Descripción |
 |---|---|
-| **Autenticación** | Registro e inicio de sesión con validación de formato de correo, contraseña y sesión persistente. |
+| **Autenticación** | Registro e inicio de sesión contra el backend, con validación real de formularios y sesión persistente (JWT, con refresh automático). |
 | **Pantalla principal** | Saludo personalizado, ofertas especiales destacadas y productos disponibles. |
 | **Productos** | Catálogo completo con búsqueda por nombre y filtro por categoría. |
-| **Detalle de producto** | Descripción, precio con descuento, stock, fecha de vencimiento y selector de cantidad. |
+| **Detalle de producto** | Descripción, precio con descuento, stock, fecha de vencimiento (con indicador de urgencia) y selector de cantidad. |
 | **Ofertas especiales** | Productos próximos a vencer con descuento destacado. |
-| **Carrito de compra** | Edición de cantidades, eliminación de ítems y cálculo de total en tiempo real. |
-| **Formulario de pedido** | Dirección de entrega, método de pago y notas para el negocio. |
+| **Carrito de compra** | Edición de cantidades (respetando el stock real), eliminación de ítems y cálculo de total en tiempo real. |
+| **Formulario de pedido** | Dirección de entrega, método de pago (**Tarjeta**, Yape o Plin, con validaciones reales de cada uno) y notas para el negocio. |
 | **Confirmación de pedido** | Resumen de éxito con número de pedido. |
 | **Mis pedidos** | Historial de pedidos con estado (pendiente, en preparación, listo, entregado, cancelado). |
 | **Detalle de pedido** | Resumen completo de productos, total, entrega y pago. |
 | **Perfil** | Edición de datos personales y cierre de sesión. |
+| **Notificaciones push** | Aviso vía Firebase Cloud Messaging cuando un producto está por vencer. |
+
+Sobre el pago con **Tarjeta**: es simulado (no hay pasarela real), pero pide número,
+vencimiento, CVV y titular como en un formulario real. Por seguridad, el número completo y
+el CVV nunca se envían al backend ni se guardan en ningún lado — solo se envían los
+**últimos 4 dígitos** (igual que cualquier confirmación de pago real), reutilizando el mismo
+campo que ya existía para el número de operación de Yape/Plin.
 
 ---
 
 ## 🏗️ Arquitectura
 
-La app sigue **MVVM** organizada por capas, para que la fuente de datos pueda evolucionar de local a remota sin tocar la UI:
+MVVM organizado por capas:
 
 ```
 ui/            Composables (pantallas + componentes reutilizables) y ViewModels
-domain/        Modelos de dominio
+domain/        Modelos de dominio y validadores de formularios
 data/
-  local/       Room (SQLite): entidades, DAOs, base de datos y datos de ejemplo
-  repository/  Interfaces + implementación (hoy Room, mañana Retrofit)
+  remote/      Retrofit: APIs, DTOs y NetworkModule (auth con refresh automático de token)
+  repository/  Implementaciones remotas (Remote*RepositoryImpl) sobre esas APIs
   session/     Sesión de usuario (DataStore Preferences)
 di/            Inyección de dependencias manual (AppContainer + ViewModelFactory)
 navigation/    Rutas y grafo de navegación (Navigation Compose)
+notifications/ Servicio de Firebase Cloud Messaging
 ```
 
-**Persistencia actual:** los datos (usuarios, productos, carrito y pedidos) se almacenan en una base de datos **relacional local (Room/SQLite)**, ya que aún no existe un backend compartido con la web de Administradores. La capa de `repository` está diseñada como una interfaz independiente de la fuente de datos, de modo que al integrar la API REST del backend solo se reemplaza la implementación (por una basada en Retrofit), sin modificar ViewModels ni pantallas.
+**Persistencia**: no hay base de datos local — todos los datos (productos, carrito,
+pedidos, usuarios) viven en el backend compartido con el panel de administración, consumido
+vía Retrofit/OkHttp.
 
 ---
 
@@ -56,9 +63,10 @@ navigation/    Rutas y grafo de navegación (Navigation Compose)
 - **Kotlin** + **Jetpack Compose** (Material 3)
 - **MVVM** con `ViewModel`, `StateFlow` y `Coroutines`
 - **Navigation Compose** para la navegación entre pantallas
-- **Room** para persistencia local relacional
+- **Retrofit + OkHttp** para consumir la API REST (JWT con refresh automático)
 - **DataStore Preferences** para la sesión del usuario
-- **Coil** para carga de imágenes
+- **Coil** para carga de imágenes remotas
+- **Firebase Cloud Messaging** para notificaciones push
 - Inyección de dependencias manual (`AppContainer`), sin frameworks externos
 
 ---
@@ -70,21 +78,35 @@ navigation/    Rutas y grafo de navegación (Navigation Compose)
 - **Android Studio** (Ladybug o superior recomendado)
 - **JDK 11+** (se recomienda usar el JDK embebido de Android Studio)
 - Emulador o dispositivo físico con **Android 7.0 (API 24)** o superior
-- Conexión a internet (las imágenes de productos se cargan desde una URL de ejemplo)
+- Conexión a internet (consume la API real del backend)
 
 ### Pasos
 
-1. Clona el repositorio y cambia a esta rama:
+1. Clona el repositorio:
    ```bash
    git clone https://github.com/Alex05ander2004/PROYECTO_FINAL_DANP.git
-   cd PROYECTO_FINAL_DANP
-   git checkout Willy-ReFood_Movil
    ```
-2. Abre la carpeta del proyecto en **Android Studio**.
+2. Abre la carpeta `ReFood-App/` en **Android Studio**.
 3. Deja que Gradle sincronice las dependencias.
 4. Ejecuta la app (▶) sobre un emulador o dispositivo conectado.
 
-La base de datos se crea automáticamente en el primer inicio, precargada con un catálogo de productos de ejemplo (panadería, lácteos, frutas y verduras, abarrotes y bebidas).
+Por defecto la app apunta al **backend en producción** (Render), así que funciona sin
+levantar nada más — solo necesitas conexión a internet. Ten en cuenta que el backend está en
+el plan gratuito de Render: si nadie lo usó en un rato, el primer request puede tardar
+**50 segundos o más** mientras "despierta" (la app espera hasta 60s antes de mostrar error).
+
+### Apuntar a un backend local (opcional, para desarrollar)
+
+Si estás desarrollando el backend y quieres probar contra tu propia PC en vez de Render,
+crea (o edita) `local.properties` en la raíz del proyecto y agrega:
+
+```properties
+REFOOD_API_BASE_URL=http://10.0.2.2:8000/
+```
+
+(`10.0.2.2` es el alias que usa el emulador de Android Studio para apuntar al `localhost` de
+tu PC; para un celular físico en la misma WiFi, usa la IP de red local de tu PC en su lugar).
+`local.properties` no se sube a git — es configuración de cada desarrollador.
 
 ---
 
@@ -93,24 +115,19 @@ La base de datos se crea automáticamente en el primer inicio, precargada con un
 ```
 app/src/main/java/com/example/refood/
 ├── data/
-│   ├── local/        # Entidades Room, DAOs, AppDatabase, seed de datos
-│   ├── repository/   # Interfaces y su implementación
+│   ├── remote/        # Retrofit: APIs, DTOs, NetworkModule
+│   ├── repository/    # Implementaciones remotas sobre las APIs
 │   └── session/       # SessionManager (DataStore)
-├── di/                # AppContainer y ViewModelFactory
-├── domain/model/      # Modelos de dominio (Product, Order, User, CartLine, ...)
-├── navigation/        # Rutas y NavGraph
+├── di/                 # AppContainer y ViewModelFactory
+├── domain/
+│   ├── model/          # Modelos de dominio (Product, Order, User, CartLine, ...)
+│   └── validation/     # Validadores de formularios (FieldValidators)
+├── navigation/         # Rutas y NavGraph
+├── notifications/      # Firebase Cloud Messaging
 ├── ui/
-│   ├── components/    # Componentes reutilizables (ProductCard, StatusChip, ...)
-│   ├── screens/       # Pantallas + ViewModels por módulo (auth, home, products, cart, order, orders, profile)
-│   └── theme/         # Color, tipografía y formas de la marca ReFood
+│   ├── components/     # Componentes reutilizables (ProductCard, StatusChip, ...)
+│   ├── screens/        # Pantallas + ViewModels por módulo (auth, home, products, cart, order, orders, profile)
+│   └── theme/          # Color, tipografía y formas de la marca ReFood
 ├── MainActivity.kt
 └── ReFoodApplication.kt
 ```
-
----
-
-## 🔜 Próximos pasos
-
-- Integrar la API REST compartida con la web de Administradores sobre la base de datos relacional.
-- Sustituir el hashing local de contraseñas por autenticación gestionada en el backend.
-- Sincronizar catálogo de productos y estados de pedido en tiempo real entre ambas plataformas.

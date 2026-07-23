@@ -2,7 +2,29 @@
 
 Backend en Django + Django REST Framework para la plataforma ReFood.
 
-## Requisitos previos
+## 🚀 En producción
+
+Ya está desplegado y funcionando en **https://proyecto-final-danp.onrender.com** — no hace
+falta correrlo en local para probar el panel de administración o la app Android, que ya
+apuntan ahí por defecto. Las instrucciones de abajo son solo para desarrollar/depurar el
+backend en tu propia máquina.
+
+Detalles de la infraestructura:
+
+- **Hosting**: [Render](https://render.com) (plan free), desplegado desde la rama `main`.
+  El servicio "duerme" tras un rato sin tráfico; el primer request tras eso puede tardar
+  50s+ en responder mientras arranca de nuevo.
+- **Base de datos**: Postgres en Supabase, accedido vía el *connection pooler*
+  (`aws-*.pooler.supabase.com`, no el host directo `db.<ref>.supabase.co`) porque Render no
+  tiene salida IPv6 y la conexión directa de Supabase resuelve a una IP IPv6.
+- **Imágenes de producto**: Supabase Storage (bucket `product-images`), no el filesystem
+  local — Render tiene disco efímero, así que cualquier imagen subida se perdería en el
+  siguiente deploy si se guardara ahí.
+- **Variables de entorno**: configuradas directamente en el dashboard de Render
+  (Environment), con los mismos nombres que en `.env.example` más
+  `SUPABASE_STORAGE_*` y `FIREBASE_CREDENTIALS_JSON` (ver más abajo).
+
+## Requisitos previos (para correrlo en local)
 
 - Python 3.10 o superior
 - Git
@@ -121,9 +143,16 @@ automáticamente y envía una notificación push a los usuarios registrados:
 | ≤ 7 | 40% |
 | ≤ 2 | 60% |
 
-Requiere el archivo de credenciales de Firebase Admin (`secrets/firebase-adminsdk.json`,
-**nunca se sube a git**) y `FIREBASE_CREDENTIALS_PATH` en tu `.env` si lo guardaste
-en otra ruta.
+Requiere las credenciales de Firebase Admin, de dos formas posibles (ver
+`core/apps.py`):
+
+- **Local**: el archivo `secrets/firebase-adminsdk.json` (**nunca se sube a git**), con
+  `FIREBASE_CREDENTIALS_PATH` en tu `.env` si lo guardaste en otra ruta.
+- **Producción (Render)**: no hay archivo — se pasa el JSON completo (una sola línea) en la
+  variable de entorno `FIREBASE_CREDENTIALS_JSON`.
+
+Si no encuentra ninguna de las dos, el backend arranca igual pero deja las notificaciones
+push deshabilitadas (no revienta el arranque).
 
 Para probarlo manualmente:
 ```bash

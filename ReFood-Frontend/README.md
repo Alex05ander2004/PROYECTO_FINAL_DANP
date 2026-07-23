@@ -1,16 +1,48 @@
-# React + Vite
+# ReFood — Panel de Administración
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Panel web para administradores de ReFood: gestión de productos, pedidos y usuarios.
+React + Vite, consumiendo la API REST del backend Django.
 
-Currently, two official plugins are available:
+## 🚀 En producción
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Ya está desplegado en **https://proyecto-final-danp.vercel.app** — pide a un compañero las
+credenciales de una cuenta administradora para entrar. Apunta al backend en Render, no hace
+falta correr nada en local para probarlo.
 
-## React Compiler
+## Funcionalidades
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| Módulo | Descripción |
+|---|---|
+| **Login** | Solo para cuentas con rol Administrador (los clientes usan la app Android). |
+| **Productos** | Listado, alta, edición y borrado. Precio, descuento, stock, categoría, fecha de vencimiento e imagen. |
+| **Pedidos** | Listado de todos los pedidos, con detalle de productos, método de pago (Tarjeta/Yape/Plin) y cambio de estado. |
+| **Usuarios** | Listado y gestión de cuentas registradas. |
 
-## Expanding the ESLint configuration
+## Correr en local
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Requisitos
+
+- Node.js 18+
+- El backend corriendo (local o apuntando al de Render — ver más abajo)
+
+### Pasos
+
+```bash
+npm install
+npm run dev
+```
+
+Por defecto usa `http://127.0.0.1:8000/api` (backend local). Para apuntar a otro backend
+(por ejemplo, el de producción en Render), copia `.env.example` a `.env` y define:
+
+```
+VITE_API_BASE_URL=https://proyecto-final-danp.onrender.com/api
+```
+
+## Despliegue (Vercel)
+
+- **Root Directory**: `ReFood-Frontend`
+- **Framework**: Vite (autodetectado)
+- **Variable de entorno**: `VITE_API_BASE_URL` apuntando al backend
+- `vercel.json` incluye un rewrite (`/(.*) → /index.html`) necesario para que las rutas de
+  React Router (`/login`, `/dashboard`, etc.) no den 404 al navegar directo a ellas.
