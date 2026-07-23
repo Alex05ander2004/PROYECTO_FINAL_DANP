@@ -5,8 +5,11 @@ Backend en Django + Django REST Framework para la plataforma ReFood.
 ## Requisitos previos
 
 - Python 3.10 o superior
-- PostgreSQL (con pgAdmin recomendado)
 - Git
+- Acceso a la base de datos Postgres del proyecto en Supabase (pide las
+  credenciales al equipo — ver sección "Base de datos" abajo). También se
+  puede usar Postgres local (con pgAdmin) si prefieres una copia propia
+  para desarrollar sin conexión.
 
 ## 1. Crear y activar el entorno virtual
 
@@ -29,9 +32,17 @@ python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
-## 3. Configurar PostgreSQL
+## 3. Base de datos
 
-Usando pgAdmin:
+El proyecto usa **Supabase** (Postgres administrado) como base de datos
+compartida por todo el equipo — así todos trabajan sobre los mismos datos
+sin tener que sincronizar copias locales. Pide a un compañero las
+credenciales de conexión (host, puerto, usuario, contraseña) desde el panel
+de Supabase (Project Settings → Database, o el botón "Connect"), **nunca
+se comparten por git**.
+
+Alternativa para desarrollar sin conexión (base propia, no compartida):
+usando pgAdmin local:
 
 1. Crea una base de datos, ej. `refood_db`
 2. Crea un rol/usuario, ej. `refood_user`, con una contraseña, con **Can login = Yes**
@@ -45,7 +56,7 @@ ALTER SCHEMA public OWNER TO refood_user;
 
 ## 4. Configurar variables de entorno
 
-Copia la plantilla y completa tus propios valores:
+Copia la plantilla:
 
 ```bash
 cp .env.example .env
@@ -57,7 +68,8 @@ Genera tu propio `SECRET_KEY`:
 python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
 ```
 
-Pega el resultado en `.env`, junto con los datos de tu base de datos local.
+Pega el resultado en `.env`, junto con los datos de conexión de Supabase (o
+de tu Postgres local si usas la alternativa de arriba).
 
 ## 5. Aplicar migraciones
 
