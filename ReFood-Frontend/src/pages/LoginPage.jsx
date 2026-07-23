@@ -13,7 +13,7 @@ export default function LoginPage() {
   useEffect(() => {
     const token = localStorage.getItem('access_token')
     if (token) {
-      navigate('/dashboard', { replace: true })
+      navigate('/products', { replace: true })
     }
   }, [navigate])
 
@@ -34,7 +34,7 @@ export default function LoginPage() {
 
       localStorage.setItem('access_token', access)
       localStorage.setItem('refresh_token', refresh)
-      navigate('/dashboard')
+      navigate('/products')
     } catch (err) {
       if (err.response?.status === 401) {
         setError('Correo o contraseña incorrectos.')

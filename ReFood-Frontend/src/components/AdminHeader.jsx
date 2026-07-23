@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import { LogOut, Leaf } from 'lucide-react'
 
 const NAV_LINKS = [
-  { to: '/dashboard', label: 'Productos' },
+  { to: '/products', label: 'Productos' },
   { to: '/orders', label: 'Pedidos' },
   { to: '/users', label: 'Usuarios' },
 ]

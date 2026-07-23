@@ -11,7 +11,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/dashboard" element={<ProductsPage />} />
+        <Route path="/products" element={<ProductsPage />} />
         <Route path="/products/new" element={<ProductFormPage />} />
         <Route path="/products/:id/edit" element={<ProductFormPage />} />
         <Route path="/orders" element={<OrdersPage />} />
