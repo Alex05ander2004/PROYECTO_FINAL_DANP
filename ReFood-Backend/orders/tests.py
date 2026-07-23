@@ -58,7 +58,7 @@ class CartAndCheckoutTests(APITestCase):
     def test_checkout_creates_order_and_clears_cart(self):
         self.client.post('/api/orders/cart/', {'product': self.product.id, 'quantity': 2})
         response = self.client.post('/api/orders/checkout/', {
-            'delivery_address': 'Av. Test 123', 'payment_method': 'EFECTIVO', 'notes': '',
+            'delivery_address': 'Av. Test 123', 'payment_method': 'TARJETA', 'notes': '',
         })
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(float(response.data['total']), 20.0)
@@ -78,37 +78,37 @@ class CartAndCheckoutTests(APITestCase):
 
     def test_checkout_fails_with_empty_cart(self):
         response = self.client.post('/api/orders/checkout/', {
-            'delivery_address': 'Av. Test 123', 'payment_method': 'EFECTIVO', 'notes': '',
+            'delivery_address': 'Av. Test 123', 'payment_method': 'TARJETA', 'notes': '',
         })
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_checkout_fails_with_insufficient_stock(self):
         self.client.post('/api/orders/cart/', {'product': self.product.id, 'quantity': 999})
         response = self.client.post('/api/orders/checkout/', {
-            'delivery_address': 'Av. Test 123', 'payment_method': 'EFECTIVO', 'notes': '',
+            'delivery_address': 'Av. Test 123', 'payment_method': 'TARJETA', 'notes': '',
         })
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.product.refresh_from_db()
         self.assertEqual(self.product.stock, 5)
 
     def test_orders_scoped_to_own_user(self):
-        Order.objects.create(user=self.other_user, delivery_address='x', payment_method='EFECTIVO', total=10)
+        Order.objects.create(user=self.other_user, delivery_address='x', payment_method='TARJETA', total=10)
         response = self.client.get('/api/orders/')
         self.assertEqual(len(response.data), 0)
 
     def test_admin_sees_all_orders(self):
-        Order.objects.create(user=self.other_user, delivery_address='x', payment_method='EFECTIVO', total=10)
+        Order.objects.create(user=self.other_user, delivery_address='x', payment_method='TARJETA', total=10)
         self.client.force_authenticate(user=self.admin)
         response = self.client.get('/api/orders/')
         self.assertEqual(len(response.data), 1)
 
     def test_client_cannot_update_order_status(self):
-        order = Order.objects.create(user=self.user, delivery_address='x', payment_method='EFECTIVO', total=10)
+        order = Order.objects.create(user=self.user, delivery_address='x', payment_method='TARJETA', total=10)
         response = self.client.patch(f'/api/orders/{order.id}/', {'status': 'ENTREGADO'})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_admin_can_update_order_status(self):
-        order = Order.objects.create(user=self.user, delivery_address='x', payment_method='EFECTIVO', total=10)
+        order = Order.objects.create(user=self.user, delivery_address='x', payment_method='TARJETA', total=10)
         self.client.force_authenticate(user=self.admin)
         response = self.client.patch(f'/api/orders/{order.id}/', {'status': 'ENTREGADO'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)

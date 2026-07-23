@@ -13,7 +13,7 @@ const STATUS_OPTIONS = [
 ]
 
 const PAYMENT_LABELS = {
-  EFECTIVO: 'Efectivo',
+  TARJETA: 'Tarjeta',
   YAPE: 'Yape',
   PLIN: 'Plin',
 }
@@ -123,7 +123,11 @@ export default function OrdersPage() {
                           {PAYMENT_LABELS[order.payment_method] ?? order.payment_method}
                         </div>
                         {order.payment_reference && (
-                          <div className="text-xs text-ink-soft">Op: {order.payment_reference}</div>
+                          <div className="text-xs text-ink-soft">
+                            {order.payment_method === 'TARJETA'
+                              ? `Tarjeta •••• ${order.payment_reference}`
+                              : `Op: ${order.payment_reference}`}
+                          </div>
                         )}
                       </td>
                       <td className="px-4 py-3">

@@ -12,7 +12,7 @@ class Order(models.Model):
         CANCELADO = 'CANCELADO', 'Cancelado'
 
     class PaymentMethod(models.TextChoices):
-        EFECTIVO = 'EFECTIVO', 'Efectivo'
+        TARJETA = 'TARJETA', 'Tarjeta'
         YAPE = 'YAPE', 'Yape'
         PLIN = 'PLIN', 'Plin'
 

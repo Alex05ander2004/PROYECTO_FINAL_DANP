@@ -21,14 +21,14 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-// Debe coincidir con Order.PaymentMethod del backend (EFECTIVO / YAPE / PLIN).
-val PAYMENT_METHODS = listOf("Efectivo", "Yape", "Plin")
+// Debe coincidir con Order.PaymentMethod del backend (TARJETA / YAPE / PLIN).
+val PAYMENT_METHODS = listOf("Tarjeta", "Yape", "Plin")
 
 /** Número de contacto de ReFood para pagos por Yape/Plin. Placeholder hasta que exista
  *  un dato real de la tienda/administrador en el backend. */
 const val STORE_PAYMENT_NUMBER = "987 654 321"
 
-fun paymentMethodRequiresReference(paymentMethod: String) = paymentMethod != "Efectivo"
+fun isCardPayment(paymentMethod: String) = paymentMethod == "Tarjeta"
 
 data class OrderFormUiState(
     val lines: List<CartLine> = emptyList(),
@@ -36,20 +36,32 @@ data class OrderFormUiState(
     val deliveryAddress: String = "",
     val paymentMethod: String = PAYMENT_METHODS.first(),
     val operationNumber: String = "",
+    val cardNumber: String = "",
+    val cardExpiry: String = "",
+    val cardCvv: String = "",
+    val cardHolderName: String = "",
     val notes: String = "",
     val isLoading: Boolean = true,
     val isSubmitting: Boolean = false,
     val errorMessage: String? = null,
     val placedOrderId: Long? = null
 ) {
-    val requiresOperationNumber: Boolean get() = paymentMethodRequiresReference(paymentMethod)
+    val isCardSelected: Boolean get() = isCardPayment(paymentMethod)
 }
+
+private data class PaymentDetails(
+    val operationNumber: String,
+    val cardNumber: String,
+    val cardExpiry: String,
+    val cardCvv: String,
+    val cardHolderName: String
+)
 
 private data class DraftFields(
     val address: String,
     val payment: String,
-    val operationNumber: String,
-    val notes: String
+    val notes: String,
+    val details: PaymentDetails
 )
 
 private data class FormFields(
@@ -69,6 +81,10 @@ class OrderFormViewModel(
     private val deliveryAddress = MutableStateFlow("")
     private val paymentMethod = MutableStateFlow(PAYMENT_METHODS.first())
     private val operationNumber = MutableStateFlow("")
+    private val cardNumber = MutableStateFlow("")
+    private val cardExpiry = MutableStateFlow("")
+    private val cardCvv = MutableStateFlow("")
+    private val cardHolderName = MutableStateFlow("")
     private val notes = MutableStateFlow("")
     private val isSubmitting = MutableStateFlow(false)
     private val errorMessage = MutableStateFlow<String?>(null)
@@ -82,9 +98,13 @@ class OrderFormViewModel(
         }
     }
 
+    private val paymentDetailsFlow = combine(
+        operationNumber, cardNumber, cardExpiry, cardCvv, cardHolderName
+    ) { op, number, expiry, cvv, holder -> PaymentDetails(op, number, expiry, cvv, holder) }
+
     private val draftFieldsFlow = combine(
-        deliveryAddress, paymentMethod, operationNumber, notes
-    ) { address, payment, opNumber, n -> DraftFields(address, payment, opNumber, n) }
+        deliveryAddress, paymentMethod, notes, paymentDetailsFlow
+    ) { address, payment, n, details -> DraftFields(address, payment, n, details) }
 
     private val formFieldsFlow = combine(
         draftFieldsFlow, isSubmitting, errorMessage, placedOrderId
@@ -99,7 +119,11 @@ class OrderFormViewModel(
             total = lines.sumOf { it.lineTotal },
             deliveryAddress = form.draft.address,
             paymentMethod = form.draft.payment,
-            operationNumber = form.draft.operationNumber,
+            operationNumber = form.draft.details.operationNumber,
+            cardNumber = form.draft.details.cardNumber,
+            cardExpiry = form.draft.details.cardExpiry,
+            cardCvv = form.draft.details.cardCvv,
+            cardHolderName = form.draft.details.cardHolderName,
             notes = form.draft.notes,
             isLoading = false,
             isSubmitting = form.submitting,
@@ -124,6 +148,27 @@ class OrderFormViewModel(
         errorMessage.value = null
     }
 
+    fun onCardNumberChange(value: String) {
+        cardNumber.value = value.filter { it.isDigit() }.take(19)
+        errorMessage.value = null
+    }
+
+    fun onCardExpiryChange(value: String) {
+        val digits = value.filter { it.isDigit() }.take(4)
+        cardExpiry.value = if (digits.length > 2) "${digits.take(2)}/${digits.drop(2)}" else digits
+        errorMessage.value = null
+    }
+
+    fun onCardCvvChange(value: String) {
+        cardCvv.value = value.filter { it.isDigit() }.take(4)
+        errorMessage.value = null
+    }
+
+    fun onCardHolderNameChange(value: String) {
+        cardHolderName.value = value.filter { !it.isDigit() }
+        errorMessage.value = null
+    }
+
     fun onNotesChange(value: String) {
         notes.value = value
     }
@@ -139,13 +184,41 @@ class OrderFormViewModel(
             errorMessage.value = addressError
             return
         }
-        if (state.requiresOperationNumber) {
+
+        val paymentReference: String
+        if (state.isCardSelected) {
+            val cardNumberError = FieldValidators.cardNumberError(state.cardNumber)
+            if (cardNumberError != null) {
+                errorMessage.value = cardNumberError
+                return
+            }
+            val expiryError = FieldValidators.cardExpiryError(state.cardExpiry)
+            if (expiryError != null) {
+                errorMessage.value = expiryError
+                return
+            }
+            val cvvError = FieldValidators.cardCvvError(state.cardCvv)
+            if (cvvError != null) {
+                errorMessage.value = cvvError
+                return
+            }
+            val holderError = FieldValidators.cardHolderNameError(state.cardHolderName)
+            if (holderError != null) {
+                errorMessage.value = holderError
+                return
+            }
+            // Nunca se envia el numero completo ni el CVV: solo los ultimos 4
+            // digitos, igual que cualquier confirmacion de pago real.
+            paymentReference = state.cardNumber.takeLast(4)
+        } else {
             val operationError = FieldValidators.operationNumberError(state.operationNumber)
             if (operationError != null) {
                 errorMessage.value = operationError
                 return
             }
+            paymentReference = state.operationNumber
         }
+
         viewModelScope.launch {
             isSubmitting.value = true
             val userId = userIdFlow.first()
@@ -155,7 +228,7 @@ class OrderFormViewModel(
                 paymentMethod = state.paymentMethod,
                 notes = state.notes,
                 lines = state.lines,
-                paymentReference = if (state.requiresOperationNumber) state.operationNumber else null
+                paymentReference = paymentReference
             ).onSuccess { orderId ->
                 isSubmitting.value = false
                 placedOrderId.value = orderId

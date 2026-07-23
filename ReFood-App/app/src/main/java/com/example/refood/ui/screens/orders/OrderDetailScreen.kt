@@ -107,7 +107,11 @@ fun OrderDetailScreen(
             if (!order.paymentReference.isNullOrBlank()) {
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "N° de operación: ${order.paymentReference}",
+                    text = if (order.paymentMethod == "Tarjeta") {
+                        "Tarjeta terminada en ${order.paymentReference}"
+                    } else {
+                        "N° de operación: ${order.paymentReference}"
+                    },
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

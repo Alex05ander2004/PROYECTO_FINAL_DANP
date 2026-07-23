@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -25,10 +26,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.example.refood.ui.components.PrimaryButton
 import com.example.refood.ui.components.ReFoodTopBar
@@ -44,6 +51,11 @@ fun OrderFormScreen(
     LaunchedEffect(uiState.placedOrderId) {
         uiState.placedOrderId?.let { onOrderPlaced(it) }
     }
+
+    // TextFieldValue propio (con posicion de cursor explicita): al autoinsertar
+    // el "/" del vencimiento, un OutlinedTextField basado solo en String puede
+    // dejar el cursor en el lugar equivocado y desordenar los siguientes digitos.
+    var cardExpiryField by remember { mutableStateOf(TextFieldValue(uiState.cardExpiry)) }
 
     Scaffold(
         topBar = { ReFoodTopBar(title = "Datos del pedido", onBack = onBack) }
@@ -108,16 +120,68 @@ fun OrderFormScreen(
             }
             Spacer(modifier = Modifier.height(6.dp))
             Text(
-                text = if (uiState.requiresOperationNumber) {
-                    "Envía el pago desde tu app de ${uiState.paymentMethod} y luego escribe el número de operación."
+                text = if (uiState.isCardSelected) {
+                    "Ingresa los datos de tu tarjeta para completar el pago."
                 } else {
-                    "Pagarás en efectivo cuando recibas tu pedido."
+                    "Envía el pago desde tu app de ${uiState.paymentMethod} y luego escribe el número de operación."
                 },
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            if (uiState.requiresOperationNumber) {
+            if (uiState.isCardSelected) {
+                Spacer(modifier = Modifier.height(12.dp))
+                OutlinedTextField(
+                    value = uiState.cardNumber,
+                    onValueChange = viewModel::onCardNumberChange,
+                    label = { Text("Número de tarjeta") },
+                    placeholder = { Text("4242 4242 4242 4242") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    OutlinedTextField(
+                        value = cardExpiryField,
+                        onValueChange = { newValue ->
+                            val digits = newValue.text.filter { it.isDigit() }.take(4)
+                            val formatted = if (digits.length > 2) {
+                                "${digits.take(2)}/${digits.drop(2)}"
+                            } else {
+                                digits
+                            }
+                            cardExpiryField = TextFieldValue(formatted, TextRange(formatted.length))
+                            viewModel.onCardExpiryChange(newValue.text)
+                        },
+                        label = { Text("MM/AA") },
+                        placeholder = { Text("12/28") },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.weight(1f)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    OutlinedTextField(
+                        value = uiState.cardCvv,
+                        onValueChange = viewModel::onCardCvvChange,
+                        label = { Text("CVV") },
+                        placeholder = { Text("123") },
+                        singleLine = true,
+                        visualTransformation = PasswordVisualTransformation(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+                OutlinedTextField(
+                    value = uiState.cardHolderName,
+                    onValueChange = viewModel::onCardHolderNameChange,
+                    label = { Text("Nombre del titular") },
+                    placeholder = { Text("Como aparece en la tarjeta") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            } else {
                 Spacer(modifier = Modifier.height(12.dp))
                 Column(
                     modifier = Modifier
