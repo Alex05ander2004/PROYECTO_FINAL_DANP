@@ -88,6 +88,15 @@ class Command(BaseCommand):
             )
 
             placeholder = media_dir / PLACEHOLDER_IMAGES[index % len(PLACEHOLDER_IMAGES)]
+            if not placeholder.exists():
+                # Si la imagen no existe, se genera con Pillow
+                placeholder.parent.mkdir(parents=True, exist_ok=True)
+                from PIL import Image, ImageDraw
+                img = Image.new('RGB', (800, 800), color=(200, 200, 200))
+                d = ImageDraw.Draw(img)
+                d.text((350, 400), placeholder.name, fill=(0, 0, 0))
+                img.save(placeholder)
+
             with open(placeholder, "rb") as f:
                 product.image.save(placeholder.name, File(f), save=False)
 
