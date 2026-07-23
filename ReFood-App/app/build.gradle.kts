@@ -8,14 +8,15 @@ plugins {
 }
 
 // URL base de la API, configurable por developer sin tocar codigo versionado.
-// Default: alias 10.0.2.2, que en el emulador de Android Studio apunta al
-// localhost de la PC. Para un celular fisico, cada quien pone su IP de red
-// local en su propio local.properties (REFOOD_API_BASE_URL=http://<ip>:8000/).
+// Default: backend en produccion (Render). Para desarrollo local contra el
+// servidor de la propia PC (emulador: 10.0.2.2, celular fisico: IP de red
+// local), cada quien lo pone en su propio local.properties
+// (REFOOD_API_BASE_URL=http://<ip>:8000/).
 val localProperties = Properties().apply {
     val file = rootProject.file("local.properties")
     if (file.exists()) file.inputStream().use { load(it) }
 }
-val apiBaseUrl = (localProperties.getProperty("REFOOD_API_BASE_URL") ?: "http://10.0.2.2:8000/")
+val apiBaseUrl = (localProperties.getProperty("REFOOD_API_BASE_URL") ?: "https://proyecto-final-danp.onrender.com/")
 
 android {
     namespace = "com.example.refood"

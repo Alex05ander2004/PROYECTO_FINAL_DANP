@@ -12,6 +12,7 @@ import okhttp3.Route
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.TimeUnit
 
 /**
  * Cliente de red para Auth. El refresh de token usa un cliente "plano" sin el
@@ -26,9 +27,18 @@ class NetworkModule(private val sessionManager: SessionManager) {
         level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
     }
 
+    // El backend gratuito de Render "duerme" tras inactividad: el primer
+    // request tras un rato puede tardar 50s+ en despertarlo. El timeout por
+    // defecto de OkHttp (10s) no alcanza y siempre daba "Sin conexion".
+    private fun OkHttpClient.Builder.withRenderColdStartTimeouts(): OkHttpClient.Builder = apply {
+        connectTimeout(60, TimeUnit.SECONDS)
+        readTimeout(60, TimeUnit.SECONDS)
+        writeTimeout(60, TimeUnit.SECONDS)
+    }
+
     private val plainRetrofit = Retrofit.Builder()
         .baseUrl(apiBaseUrl)
-        .client(OkHttpClient.Builder().addInterceptor(loggingInterceptor()).build())
+        .client(OkHttpClient.Builder().addInterceptor(loggingInterceptor()).withRenderColdStartTimeouts().build())
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
@@ -69,6 +79,7 @@ class NetworkModule(private val sessionManager: SessionManager) {
         .addInterceptor(authInterceptor)
         .authenticator(authenticator)
         .addInterceptor(loggingInterceptor())
+        .withRenderColdStartTimeouts()
         .build()
 
     private val retrofit = Retrofit.Builder()
