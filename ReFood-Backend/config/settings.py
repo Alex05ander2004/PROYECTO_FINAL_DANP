@@ -64,6 +64,7 @@ AUTH_USER_MODEL = 'users.User'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -152,6 +153,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -160,6 +162,42 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# Media en Supabase Storage (S3-compatible): en Render el disco es efimero,
+# asi que las imagenes de producto subidas por admin se perderian en cada
+# deploy si se guardaran localmente. Si hay credenciales configuradas se usa
+# Supabase Storage; si no (dev local sin configurar esto), cae al filesystem
+# de siempre para no romper el flujo de desarrollo.
+AWS_STORAGE_BUCKET_NAME = config('SUPABASE_STORAGE_BUCKET', default='')
+
+STORAGES = {
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+    },
+}
+
+if AWS_STORAGE_BUCKET_NAME:
+    AWS_ACCESS_KEY_ID = config('SUPABASE_STORAGE_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = config('SUPABASE_STORAGE_SECRET_ACCESS_KEY')
+    AWS_S3_ENDPOINT_URL = config('SUPABASE_STORAGE_ENDPOINT_URL')
+    AWS_S3_REGION_NAME = config('SUPABASE_STORAGE_REGION', default='us-east-1')
+    AWS_S3_ADDRESSING_STYLE = 'path'
+    AWS_S3_SIGNATURE_VERSION = 's3v4'
+    AWS_DEFAULT_ACL = None
+    AWS_QUERYSTRING_AUTH = False
+    AWS_S3_FILE_OVERWRITE = False
+    STORAGES['default'] = {'BACKEND': 'storages.backends.s3boto3.S3Boto3Storage'}
+
+    # El endpoint S3 (arriba) exige requests firmados incluso para GET, asi
+    # que sirve solo para subir/borrar. Para las URLs publicas que ve el
+    # navegador hay que usar el endpoint "object/public" de Supabase en vez
+    # del protocolo S3 (project ref sacado de DB_HOST: db.<ref>.supabase.co).
+    _supabase_project_ref = config('DB_HOST').removeprefix('db.').removesuffix('.supabase.co')
+    AWS_S3_CUSTOM_DOMAIN = (
+        f'{_supabase_project_ref}.supabase.co/storage/v1/object/public/{AWS_STORAGE_BUCKET_NAME}'
+    )
+else:
+    STORAGES['default'] = {'BACKEND': 'django.core.files.storage.FileSystemStorage'}
 
 # Firebase Admin SDK (notificaciones push). Archivo de credenciales, nunca
 # subir a git (ver .gitignore).
@@ -200,5 +238,18 @@ SIMPLE_JWT = {
 CORS_ALLOWED_ORIGINS = config(
     'CORS_ALLOWED_ORIGINS',
     default='http://localhost:5173,http://127.0.0.1:5173',
+    cast=lambda v: [origin.strip() for origin in v.split(',') if origin.strip()]
+)
+
+# Render (y la mayoria de PaaS) terminan TLS en un proxy y reenvian por HTTP
+# interno: sin esto Django cree que la conexion nunca es HTTPS y rechaza los
+# POST de /admin/ (CSRF) o genera links http:// en vez de https://.
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Dominios desde los que se acepta un POST con cookie de sesion (solo aplica
+# a /admin/; la API JWT usada por React/Android no pasa por aqui).
+CSRF_TRUSTED_ORIGINS = config(
+    'CSRF_TRUSTED_ORIGINS',
+    default='',
     cast=lambda v: [origin.strip() for origin in v.split(',') if origin.strip()]
 )
