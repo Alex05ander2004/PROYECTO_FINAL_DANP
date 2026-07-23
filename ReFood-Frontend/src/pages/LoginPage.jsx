@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Mail, Lock, Loader2, Leaf } from 'lucide-react'
 import { login, getMe } from '../api/authService'
@@ -9,6 +9,13 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
+
+  useEffect(() => {
+    const token = localStorage.getItem('access_token')
+    if (token) {
+      navigate('/dashboard', { replace: true })
+    }
+  }, [navigate])
 
   async function handleSubmit(e) {
     e.preventDefault()
