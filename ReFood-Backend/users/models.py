@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.base_user import BaseUserManager
+from django.core.validators import RegexValidator
 
 # Create your models here.
 class UserManager(BaseUserManager):
@@ -37,7 +38,10 @@ class User(AbstractUser):
     name = models.CharField(max_length=150)
     email = models.EmailField(unique=True)
     role = models.CharField(max_length=10, choices=Role.choices, default=Role.CLIENT)
-    phone = models.CharField(max_length=20, blank=True)
+    phone = models.CharField(
+        max_length=20, blank=True,
+        validators=[RegexValidator(r'^(\d{7,9})?$', 'El teléfono debe tener entre 7 y 9 dígitos.')]
+    )
     address = models.CharField(max_length=255, blank=True)
     fcm_token = models.CharField(max_length=255, blank=True, null=True)
 

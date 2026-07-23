@@ -1,6 +1,6 @@
 from django.db import models
 from users.models import User
-from django.core.validators import MaxValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 # Create your models here.
 class Category(models.Model):
@@ -17,7 +17,7 @@ class Product(models.Model):
     name = models.CharField(max_length=150)
     description = models.TextField(blank=True)
     category = models.ForeignKey(Category, on_delete=models.PROTECT, related_name='products')
-    price = models.DecimalField(max_digits=8, decimal_places=2)
+    price = models.DecimalField(max_digits=8, decimal_places=2, validators=[MinValueValidator(0.01)])
     discount_percentage = models.PositiveIntegerField(
         null=True, blank=True,
         validators=[MaxValueValidator(100)]

@@ -73,6 +73,16 @@ class ProductTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertTrue(Product.objects.filter(name='Nuevo').exists())
 
+    def test_rejects_zero_or_negative_price(self):
+        self.client.force_authenticate(user=self.admin)
+        for bad_price in (0, -5):
+            image = _fake_image_file()
+            response = self.client.post('/api/products/', {
+                'name': 'Precio invalido', 'category': self.category.name, 'price': bad_price, 'unit': 'kg',
+                'stock': 1, 'expiration_date': str(date.today() + timedelta(days=10)), 'image': image,
+            }, format='multipart')
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_admin_can_delete_product(self):
         self.client.force_authenticate(user=self.admin)
         response = self.client.delete(f'/api/products/{self.active_product.id}/')

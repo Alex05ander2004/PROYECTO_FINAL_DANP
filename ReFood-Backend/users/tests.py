@@ -35,9 +35,23 @@ class AuthTests(APITestCase):
     def test_register_rejects_weak_password(self):
         response = self.client.post('/api/auth/register/', {
             'name': 'Debil', 'email': 'debil@test.com', 'password': '12345678',
-            'phone': '1', 'address': 'x',
+            'phone': '987654321', 'address': 'x',
         })
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_register_rejects_invalid_phone_format(self):
+        response = self.client.post('/api/auth/register/', {
+            'name': 'Telefono invalido', 'email': 'tel@test.com', 'password': TEST_PASSWORD,
+            'phone': 'abc123', 'address': 'x',
+        })
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_register_accepts_blank_phone(self):
+        response = self.client.post('/api/auth/register/', {
+            'name': 'Sin telefono', 'email': 'sintelefono@test.com', 'password': TEST_PASSWORD,
+            'phone': '', 'address': 'x',
+        })
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_login_returns_tokens(self):
         User.objects.create_user(email='login@test.com', name='Login', password=TEST_PASSWORD)

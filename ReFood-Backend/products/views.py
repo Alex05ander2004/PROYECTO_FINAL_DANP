@@ -23,8 +23,8 @@ class ProductViewSet(viewsets.ModelViewSet):
         return [permissions.IsAuthenticated()]
 
     def get_queryset(self):
-        queryset = Product.objects.all()
-        
+        queryset = Product.objects.select_related('category')
+
         if self.request.user.role != 'ADMIN':
             queryset = queryset.filter(is_active=True)
 
