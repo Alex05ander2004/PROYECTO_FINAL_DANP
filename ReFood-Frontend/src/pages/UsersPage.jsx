@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
-import { ChevronDown, Loader2 } from 'lucide-react'
+import { ChevronDown } from 'lucide-react'
 import { getMe } from '../api/authService'
 import { getUsers, updateUser } from '../api/userService'
 import AdminHeader from '../components/AdminHeader'
+import TableSkeleton from '../components/TableSkeleton'
 
 const ROLE_OPTIONS = [
   { value: 'CLIENT', label: 'Cliente' },
@@ -70,12 +71,7 @@ export default function UsersPage() {
       <main className="max-w-6xl mx-auto px-6 py-8">
         <h1 className="text-xl font-semibold text-ink tracking-tight mb-6">Usuarios</h1>
 
-        {loading && (
-          <div className="flex items-center gap-2 text-ink-soft text-sm">
-            <Loader2 className="w-4 h-4 animate-spin" />
-            Cargando usuarios...
-          </div>
-        )}
+        {loading && <TableSkeleton columns={7} />}
 
         {error && (
           <p className="text-sm text-error bg-error-soft border border-error/30 rounded-sm px-3 py-2 mb-4">

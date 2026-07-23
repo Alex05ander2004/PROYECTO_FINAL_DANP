@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Pencil, Trash2, Plus, Loader2 } from 'lucide-react'
+import { Pencil, Trash2, Plus } from 'lucide-react'
 import { deleteProduct, getProducts } from '../api/productService'
 import AdminHeader from '../components/AdminHeader'
+import TableSkeleton from '../components/TableSkeleton'
 
 function daysUntil(dateString) {
   const target = new Date(`${dateString}T00:00:00`)
@@ -69,12 +70,7 @@ export default function ProductsPage() {
           </button>
         </div>
 
-        {loading && (
-          <div className="flex items-center gap-2 text-ink-soft text-sm">
-            <Loader2 className="w-4 h-4 animate-spin" />
-            Cargando productos...
-          </div>
-        )}
+        {loading && <TableSkeleton columns={8} />}
 
         {error && (
           <p className="text-sm text-error bg-error-soft border border-error/30 rounded-sm px-3 py-2">
