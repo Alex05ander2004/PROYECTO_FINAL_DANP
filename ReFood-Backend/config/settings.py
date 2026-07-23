@@ -14,6 +14,7 @@ import sys
 from pathlib import Path
 from decouple import config
 from datetime import timedelta
+from urllib.parse import urlparse
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -191,8 +192,10 @@ if AWS_STORAGE_BUCKET_NAME:
     # El endpoint S3 (arriba) exige requests firmados incluso para GET, asi
     # que sirve solo para subir/borrar. Para las URLs publicas que ve el
     # navegador hay que usar el endpoint "object/public" de Supabase en vez
-    # del protocolo S3 (project ref sacado de DB_HOST: db.<ref>.supabase.co).
-    _supabase_project_ref = config('DB_HOST').removeprefix('db.').removesuffix('.supabase.co')
+    # del protocolo S3. El project ref se saca del propio endpoint de
+    # Storage (no de DB_HOST: ese puede ser el connection pooler, con un
+    # hostname totalmente distinto al del proyecto).
+    _supabase_project_ref = urlparse(AWS_S3_ENDPOINT_URL).hostname.split('.')[0]
     AWS_S3_CUSTOM_DOMAIN = (
         f'{_supabase_project_ref}.supabase.co/storage/v1/object/public/{AWS_STORAGE_BUCKET_NAME}'
     )
