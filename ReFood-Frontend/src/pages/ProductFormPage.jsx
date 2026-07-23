@@ -184,7 +184,7 @@ export default function ProductFormPage() {
       } else {
         await createProduct(payload)
       }
-      navigate('/dashboard')
+      navigate('/products')
     } catch {
       setError('No se pudo guardar el producto. Revisa los datos e intenta de nuevo.')
       setSaving(false)
@@ -430,7 +430,7 @@ export default function ProductFormPage() {
               </button>
               <button
                 type="button"
-                onClick={() => navigate('/dashboard')}
+                onClick={() => navigate('/products')}
                 className="text-sm text-ink-soft hover:text-ink px-4 py-2"
               >
                 Cancelar
