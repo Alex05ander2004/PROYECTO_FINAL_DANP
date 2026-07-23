@@ -200,8 +200,10 @@ else:
     STORAGES['default'] = {'BACKEND': 'django.core.files.storage.FileSystemStorage'}
 
 # Firebase Admin SDK (notificaciones push). Archivo de credenciales, nunca
-# subir a git (ver .gitignore).
+# subir a git (ver .gitignore). En Render no hay archivo: se puede pasar el
+# JSON completo por variable de entorno (ver core/apps.py).
 FIREBASE_CREDENTIALS_PATH = str(BASE_DIR / config('FIREBASE_CREDENTIALS_PATH', default='secrets/firebase-adminsdk.json'))
+FIREBASE_CREDENTIALS_JSON = config('FIREBASE_CREDENTIALS_JSON', default='')
 
 # Rest Framework
 REST_FRAMEWORK = {
