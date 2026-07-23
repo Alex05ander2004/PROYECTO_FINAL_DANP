@@ -33,22 +33,20 @@
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-ink: #ebeeea;
-    --color-ink-soft: #9ba39a;
-    --color-paper: #101210;
-    --color-surface: #171917;
-    --color-surface-sunken: #1d201d;
-    --color-line: #2b2e29;
-    --color-accent: #74c08f;
-    --color-accent-soft: #1b2a20;
-    --color-on-accent: #08150e;
-    --color-deal: #cb9868;
-    --color-deal-soft: #2a2115;
-    --color-error: #ffb4ab;
-    --color-error-soft: #3a0c0a;
-  }
+:root.dark {
+  --color-ink: #ebeeea;
+  --color-ink-soft: #9ba39a;
+  --color-paper: #101210;
+  --color-surface: #171917;
+  --color-surface-sunken: #1d201d;
+  --color-line: #2b2e29;
+  --color-accent: #74c08f;
+  --color-accent-soft: #1b2a20;
+  --color-on-accent: #08150e;
+  --color-deal: #cb9868;
+  --color-deal-soft: #2a2115;
+  --color-error: #ffb4ab;
+  --color-error-soft: #3a0c0a;
 }
 
 body {

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Mail, Lock, Loader2, Leaf } from 'lucide-react'
 import { login, getMe } from '../api/authService'
+import ThemeToggle from '../components/ThemeToggle'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -46,7 +47,10 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-paper px-4">
+    <div className="min-h-screen flex items-center justify-center bg-paper px-4 relative">
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
       <div className="w-full max-w-sm bg-surface border border-line rounded-lg p-8">
         <div className="flex flex-col items-center mb-6">
           <div className="w-14 h-14 rounded-full bg-accent-soft flex items-center justify-center mb-3">
