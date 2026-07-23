@@ -143,13 +143,13 @@ export default function ProductsPage() {
                       <div className="flex justify-end gap-1">
                         <button
                           onClick={() => navigate(`/products/${product.id}/edit`)}
-                          className="p-2 rounded-sm hover:bg-surface-sunken text-ink-soft"
+                          className="p-2 rounded-sm text-blue-600 hover:bg-blue-600 hover:text-white transition-colors"
                         >
                           <Pencil className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(product)}
-                          className="p-2 rounded-sm hover:bg-error-soft text-error"
+                          className="p-2 rounded-sm text-red-600 hover:bg-red-600 hover:text-white transition-colors"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
