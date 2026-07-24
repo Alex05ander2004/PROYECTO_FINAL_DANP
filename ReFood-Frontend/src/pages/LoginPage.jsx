@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Mail, Lock, Loader2, Leaf } from 'lucide-react'
 import { login, getMe } from '../api/authService'
+import ThemeToggle from '../components/ThemeToggle'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -9,6 +10,13 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
+
+  useEffect(() => {
+    const token = localStorage.getItem('access_token')
+    if (token) {
+      navigate('/products', { replace: true })
+    }
+  }, [navigate])
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -27,7 +35,7 @@ export default function LoginPage() {
 
       localStorage.setItem('access_token', access)
       localStorage.setItem('refresh_token', refresh)
-      navigate('/dashboard')
+      navigate('/products')
     } catch (err) {
       if (err.response?.status === 401) {
         setError('Correo o contraseña incorrectos.')
@@ -39,7 +47,10 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-paper px-4">
+    <div className="min-h-screen flex items-center justify-center bg-paper px-4 relative">
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
       <div className="w-full max-w-sm bg-surface border border-line rounded-lg p-8">
         <div className="flex flex-col items-center mb-6">
           <div className="w-14 h-14 rounded-full bg-accent-soft flex items-center justify-center mb-3">

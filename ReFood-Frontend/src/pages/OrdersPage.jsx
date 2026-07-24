@@ -1,15 +1,16 @@
-import { useEffect, useState } from 'react'
-import { ChevronDown } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { ChevronDown, Clock, CheckCircle2, Truck, XCircle, Hourglass } from 'lucide-react'
 import { getOrders, updateOrderStatus } from '../api/orderService'
 import AdminHeader from '../components/AdminHeader'
 import TableSkeleton from '../components/TableSkeleton'
+import SearchFilterBar from '../components/SearchFilterBar'
 
 const STATUS_OPTIONS = [
-  { value: 'PENDIENTE', label: 'Pendiente', color: 'var(--color-status-pending)' },
-  { value: 'EN_PREPARACION', label: 'En preparación', color: 'var(--color-status-preparing)' },
-  { value: 'LISTO', label: 'Listo para entrega', color: 'var(--color-status-ready)' },
-  { value: 'ENTREGADO', label: 'Entregado', color: 'var(--color-status-delivered)' },
-  { value: 'CANCELADO', label: 'Cancelado', color: 'var(--color-status-cancelled)' },
+  { value: 'PENDIENTE', label: 'Pendiente', color: 'var(--color-status-pending)', icon: Clock },
+  { value: 'EN_PREPARACION', label: 'En preparación', color: 'var(--color-status-preparing)', icon: Hourglass },
+  { value: 'LISTO', label: 'Listo para entrega', color: 'var(--color-status-ready)', icon: CheckCircle2 },
+  { value: 'ENTREGADO', label: 'Entregado', color: 'var(--color-status-delivered)', icon: Truck },
+  { value: 'CANCELADO', label: 'Cancelado', color: 'var(--color-status-cancelled)', icon: XCircle },
 ]
 
 const PAYMENT_LABELS = {
@@ -17,6 +18,21 @@ const PAYMENT_LABELS = {
   YAPE: 'Yape',
   PLIN: 'Plin',
 }
+
+const ORDER_FILTERS = [
+  {
+    key: 'status',
+    label: 'Estado',
+    options: STATUS_OPTIONS.map((s) => ({ value: s.value, label: s.label })),
+  },
+  {
+    key: 'payment',
+    label: 'Tipo de pago',
+    options: Object.entries(PAYMENT_LABELS).map(([value, label]) => ({ value, label })),
+  },
+]
+
+const EMPTY_FILTERS = { status: null, payment: null }
 
 function statusMeta(status) {
   return STATUS_OPTIONS.find((option) => option.value === status) ?? STATUS_OPTIONS[0]
@@ -44,6 +60,8 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [updatingId, setUpdatingId] = useState(null)
+  const [search, setSearch] = useState('')
+  const [activeFilters, setActiveFilters] = useState(EMPTY_FILTERS)
 
   useEffect(() => {
     async function fetchOrders() {
@@ -58,6 +76,19 @@ export default function OrdersPage() {
     }
     fetchOrders()
   }, [])
+
+  const filtered = useMemo(() => {
+    return orders.filter((o) => {
+      if (search && !o.user_name?.toLowerCase().includes(search.toLowerCase())) return false
+      if (activeFilters.status && o.status !== activeFilters.status) return false
+      if (activeFilters.payment && o.payment_method !== activeFilters.payment) return false
+      return true
+    })
+  }, [orders, search, activeFilters])
+
+  function handleFilterChange(key, value) {
+    setActiveFilters((prev) => ({ ...prev, [key]: value }))
+  }
 
   async function handleStatusChange(orderId, newStatus) {
     const previous = orders
@@ -82,6 +113,15 @@ export default function OrdersPage() {
       <main className="max-w-6xl mx-auto px-6 py-8">
         <h1 className="text-xl font-semibold text-ink tracking-tight mb-6">Pedidos</h1>
 
+        <SearchFilterBar
+          search={search}
+          onSearchChange={setSearch}
+          searchPlaceholder="Buscar por nombre de cliente..."
+          filters={ORDER_FILTERS}
+          activeFilters={activeFilters}
+          onFilterChange={handleFilterChange}
+        />
+
         {loading && <TableSkeleton columns={6} />}
 
         {error && (
@@ -104,7 +144,7 @@ export default function OrdersPage() {
                 </tr>
               </thead>
               <tbody>
-                {orders.map((order) => {
+                {filtered.map((order) => {
                   const meta = statusMeta(order.status)
                   return (
                     <tr key={order.id} className="border-t border-line hover:bg-surface-sunken/60">
@@ -132,10 +172,12 @@ export default function OrdersPage() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
-                          <span
-                            className="w-1.5 h-1.5 rounded-full shrink-0"
-                            style={{ backgroundColor: meta.color }}
-                          />
+                          {meta.icon && (
+                            <meta.icon
+                              className="w-4 h-4 shrink-0"
+                              style={{ color: meta.color }}
+                            />
+                          )}
                           <div className="relative">
                             <select
                               value={order.status}
@@ -161,10 +203,12 @@ export default function OrdersPage() {
                   )
                 })}
 
-                {orders.length === 0 && (
+                {filtered.length === 0 && (
                   <tr>
                     <td colSpan={6} className="px-4 py-6 text-center text-ink-soft">
-                      No hay pedidos registrados.
+                      {orders.length === 0
+                        ? 'No hay pedidos registrados.'
+                        : 'Ningún pedido coincide con la búsqueda.'}
                     </td>
                   </tr>
                 )}

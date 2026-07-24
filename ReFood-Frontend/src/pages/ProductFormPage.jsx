@@ -19,7 +19,6 @@ const EMPTY_FORM = {
   unit: '',
   stock: '',
   expiration_date: '',
-  is_featured_offer: false,
   is_active: true,
 }
 
@@ -118,7 +117,6 @@ export default function ProductFormPage() {
             unit: product.unit,
             stock: product.stock,
             expiration_date: product.expiration_date,
-            is_featured_offer: product.is_featured_offer,
             is_active: product.is_active,
           })
           setCurrentImageUrl(product.image)
@@ -169,11 +167,13 @@ export default function ProductFormPage() {
       payload.append('price', form.price)
       if (form.discount_percentage !== '') {
         payload.append('discount_percentage', form.discount_percentage)
+      } else {
+        payload.append('discount_percentage', '0')
       }
       payload.append('unit', form.unit)
       payload.append('stock', form.stock)
       payload.append('expiration_date', form.expiration_date)
-      payload.append('is_featured_offer', form.is_featured_offer)
+      payload.append('is_featured_offer', form.discount_percentage !== '')
       payload.append('is_active', form.is_active)
       if (imageFile) {
         payload.append('image', imageFile)
@@ -184,7 +184,7 @@ export default function ProductFormPage() {
       } else {
         await createProduct(payload)
       }
-      navigate('/dashboard')
+      navigate('/products')
     } catch {
       setError('No se pudo guardar el producto. Revisa los datos e intenta de nuevo.')
       setSaving(false)
@@ -398,14 +398,6 @@ export default function ProductFormPage() {
               <label className="flex items-center gap-2 text-sm text-ink">
                 <input
                   type="checkbox"
-                  checked={form.is_featured_offer}
-                  onChange={(e) => handleChange('is_featured_offer', e.target.checked)}
-                />
-                Oferta especial
-              </label>
-              <label className="flex items-center gap-2 text-sm text-ink">
-                <input
-                  type="checkbox"
                   checked={form.is_active}
                   onChange={(e) => handleChange('is_active', e.target.checked)}
                 />
@@ -430,7 +422,7 @@ export default function ProductFormPage() {
               </button>
               <button
                 type="button"
-                onClick={() => navigate('/dashboard')}
+                onClick={() => navigate('/products')}
                 className="text-sm text-ink-soft hover:text-ink px-4 py-2"
               >
                 Cancelar
