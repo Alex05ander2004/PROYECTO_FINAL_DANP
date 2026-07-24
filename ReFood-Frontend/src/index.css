@@ -1,8 +1,5 @@
 @import "tailwindcss";
 
-/* Mismos tokens de marca que la app Android (ver ui/theme/Color.kt),
-   para que la web de administradores y la app de clientes se vean
-   como una sola identidad. */
 @theme {
   --color-ink: #14181a;
   --color-ink-soft: #6c716c;
@@ -11,7 +8,6 @@
   --color-surface-sunken: #eff1ea;
   --color-line: #e1e4dc;
   --color-accent: #16a34a;
-  /* Tailwind Green 600 - más vibrante y distinguible */
   --color-accent-soft: #dcfce7;
   --color-on-accent: #ffffff;
   --color-deal: #93552f;

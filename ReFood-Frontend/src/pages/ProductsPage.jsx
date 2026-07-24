@@ -211,7 +211,7 @@ export default function ProductsPage() {
                     <td className="px-4 py-3 font-medium text-ink">{product.name}</td>
                     <td className="px-4 py-3 text-ink-soft">{product.category}</td>
                     <td className="px-4 py-3">
-                      {product.discount_price ? (
+                      {product.discount_price != null ? (
                         <div>
                           <span className="line-through text-ink-soft text-xs mr-1">
                             S/ {product.price}

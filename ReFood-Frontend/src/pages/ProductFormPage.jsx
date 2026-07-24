@@ -167,6 +167,8 @@ export default function ProductFormPage() {
       payload.append('price', form.price)
       if (form.discount_percentage !== '') {
         payload.append('discount_percentage', form.discount_percentage)
+      } else {
+        payload.append('discount_percentage', '0')
       }
       payload.append('unit', form.unit)
       payload.append('stock', form.stock)
