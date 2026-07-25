@@ -174,34 +174,39 @@ export default function DashboardPage() {
     setExporting(true)
 
     try {
-      const resolvedTheme = theme === 'system'
-        ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-        : theme
-
       const canvas = await html2canvas(dashboardRef.current, {
         scale: 2,
-        backgroundColor: resolvedTheme === 'dark' ? '#101210' : '#f7f8f5',
         useCORS: true,
-        logging: false,
+        backgroundColor: getComputedStyle(document.body).backgroundColor || '#ffffff',
       })
 
       const imgData = canvas.toDataURL('image/png')
-      const pdf = new jsPDF('p', 'mm', 'a4')
-      const pdfWidth = pdf.internal.pageSize.getWidth()
-      const pdfHeight = pdf.internal.pageSize.getHeight()
-      const imgWidth = canvas.width
-      const imgHeight = canvas.height
-      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight)
-      const width = imgWidth * ratio
-      const height = imgHeight * ratio
-      const x = (pdfWidth - width) / 2
-      const y = (pdfHeight - height) / 2
 
-      pdf.addImage(imgData, 'PNG', x, y, width, height)
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4' })
+      const pageWidth = doc.internal.pageSize.getWidth()
+      const pageHeight = doc.internal.pageSize.getHeight()
+
+      const imgWidth = pageWidth
+      const imgHeight = (canvas.height * imgWidth) / canvas.width
+
+      let heightLeft = imgHeight
+      let position = 0
+
+      doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
+      heightLeft -= pageHeight
+
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight
+        doc.addPage()
+        doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
+        heightLeft -= pageHeight
+      }
+
       const fileName = `dashboard-refood-${new Date().toISOString().slice(0, 10)}.pdf`
-      pdf.save(fileName)
+      doc.save(fileName)
     } catch (error) {
-      window.alert('No se pudo generar el PDF. Intenta de nuevo.')
+      console.error('No se pudo generar el PDF.', error)
+      window.alert(`No se pudo generar el PDF: ${error.message || 'error desconocido'}`)
     } finally {
       setExporting(false)
     }
