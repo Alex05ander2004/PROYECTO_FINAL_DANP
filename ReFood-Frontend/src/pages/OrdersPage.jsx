@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ChevronDown, Clock, CheckCircle2, Truck, XCircle, Hourglass } from 'lucide-react'
+import { ChevronDown, Clock, CheckCircle2, Truck, XCircle, Hourglass, Eye } from 'lucide-react'
 import { getOrders, updateOrderStatus } from '../api/orderService'
+import OrderDetailModal from '../components/OrderDetailModal'
 import AdminHeader from '../components/AdminHeader'
 import TableSkeleton from '../components/TableSkeleton'
 import SearchFilterBar from '../components/SearchFilterBar'
@@ -62,6 +63,7 @@ export default function OrdersPage() {
   const [updatingId, setUpdatingId] = useState(null)
   const [search, setSearch] = useState('')
   const [activeFilters, setActiveFilters] = useState(EMPTY_FILTERS)
+  const [selectedOrder, setSelectedOrder] = useState(null)
 
   useEffect(() => {
     async function fetchOrders() {
@@ -141,6 +143,7 @@ export default function OrdersPage() {
                   <th className="px-4 py-3 font-medium">Total</th>
                   <th className="px-4 py-3 font-medium">Pago</th>
                   <th className="px-4 py-3 font-medium">Estado</th>
+                  <th className="px-4 py-3 font-medium">Detalle</th>
                 </tr>
               </thead>
               <tbody>
@@ -199,13 +202,22 @@ export default function OrdersPage() {
                           </div>
                         </div>
                       </td>
+                      <td className="px-4 py-3 text-right">
+                        <button
+                          onClick={() => setSelectedOrder(order)}
+                          className="inline-flex items-center gap-1.5 rounded-sm border border-line px-2.5 py-1.5 text-xs font-medium text-ink transition hover:bg-surface-sunken"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          Ver detalle
+                        </button>
+                      </td>
                     </tr>
                   )
                 })}
 
                 {filtered.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="px-4 py-6 text-center text-ink-soft">
+                    <td colSpan={7} className="px-4 py-6 text-center text-ink-soft">
                       {orders.length === 0
                         ? 'No hay pedidos registrados.'
                         : 'Ningún pedido coincide con la búsqueda.'}
@@ -214,6 +226,11 @@ export default function OrdersPage() {
                 )}
               </tbody>
             </table>
+            <OrderDetailModal
+              order={selectedOrder}
+              statusMeta={statusMeta}
+              onClose={() => setSelectedOrder(null)}
+            />
           </div>
         )}
       </main>
