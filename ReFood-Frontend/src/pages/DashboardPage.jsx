@@ -1,9 +1,12 @@
-import { useEffect, useMemo, useState } from 'react'
-import { AlertTriangle, Boxes, Package, ShoppingBag, Users } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { AlertTriangle, Boxes, Download, Package, ShoppingBag, Users } from 'lucide-react'
+import jsPDF from 'jspdf'
+import html2canvas from 'html2canvas'
 import AdminHeader from '../components/AdminHeader'
 import { getOrders } from '../api/orderService'
 import { getProducts } from '../api/productService'
 import { getUsers } from '../api/userService'
+import { useTheme } from '../context/ThemeContext'
 
 const STATUS_META = {
   PENDIENTE: { label: 'Pendiente', color: '#ad6a2e' },
@@ -50,6 +53,9 @@ export default function DashboardPage() {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [exporting, setExporting] = useState(false)
+  const dashboardRef = useRef(null)
+  const { theme } = useTheme()
 
   useEffect(() => {
     async function loadDashboard() {
@@ -162,6 +168,45 @@ export default function DashboardPage() {
     return segments
   }, [])
 
+  async function handleExportPdf() {
+    if (!dashboardRef.current) return
+
+    setExporting(true)
+
+    try {
+      const resolvedTheme = theme === 'system'
+        ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+        : theme
+
+      const canvas = await html2canvas(dashboardRef.current, {
+        scale: 2,
+        backgroundColor: resolvedTheme === 'dark' ? '#101210' : '#f7f8f5',
+        useCORS: true,
+        logging: false,
+      })
+
+      const imgData = canvas.toDataURL('image/png')
+      const pdf = new jsPDF('p', 'mm', 'a4')
+      const pdfWidth = pdf.internal.pageSize.getWidth()
+      const pdfHeight = pdf.internal.pageSize.getHeight()
+      const imgWidth = canvas.width
+      const imgHeight = canvas.height
+      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight)
+      const width = imgWidth * ratio
+      const height = imgHeight * ratio
+      const x = (pdfWidth - width) / 2
+      const y = (pdfHeight - height) / 2
+
+      pdf.addImage(imgData, 'PNG', x, y, width, height)
+      const fileName = `dashboard-refood-${new Date().toISOString().slice(0, 10)}.pdf`
+      pdf.save(fileName)
+    } catch (error) {
+      window.alert('No se pudo generar el PDF. Intenta de nuevo.')
+    } finally {
+      setExporting(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-paper">
@@ -182,11 +227,20 @@ export default function DashboardPage() {
       <AdminHeader />
 
       <main className="max-w-7xl mx-auto px-6 py-8 space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-4">
           <div>
             <p className="text-sm font-medium uppercase tracking-[0.2em] text-accent">Dashboard</p>
             <h1 className="text-xl font-semibold text-ink tracking-tight">Resumen del negocio</h1>
           </div>
+
+          <button
+            onClick={handleExportPdf}
+            disabled={exporting}
+            className="inline-flex items-center gap-2 rounded-sm border border-line bg-surface px-3 py-2 text-sm font-medium text-ink transition hover:bg-surface-sunken disabled:opacity-60"
+          >
+            <Download className="w-4 h-4" />
+            {exporting ? 'Generando PDF...' : 'Descargar PDF'}
+          </button>
         </div>
 
         {error ? (
@@ -195,7 +249,8 @@ export default function DashboardPage() {
           </div>
         ) : (
           <>
-            <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+            <div ref={dashboardRef} className="space-y-6">
+              <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
               <MetricCard title="Pedidos hoy" value={metrics.todayOrders} icon={<ShoppingBag className="w-5 h-5" />} accent="accent" />
               <MetricCard title="Pedidos esta semana" value={metrics.weekOrders} icon={<Package className="w-5 h-5" />} accent="deal" />
               <MetricCard title="Usuarios registrados y activos" value={metrics.totalUsers} icon={<Users className="w-5 h-5" />} accent="accent" />
@@ -203,7 +258,7 @@ export default function DashboardPage() {
               <MetricCard title="Stock bajo (< 5)" value={metrics.lowStockProducts} icon={<Boxes className="w-5 h-5" />} accent="deal" />
             </section>
 
-            <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+              <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
               <div className="rounded-md border border-line bg-surface p-5">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg font-semibold text-ink">Pedidos por estado</h2>
@@ -268,7 +323,7 @@ export default function DashboardPage() {
               </div>
             </section>
 
-            <section className="rounded-md border border-line bg-surface p-5">
+              <section className="rounded-md border border-line bg-surface p-5">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold text-ink">Top productos más vendidos</h2>
                 <span className="text-sm text-ink-soft">Por cantidad</span>
@@ -294,7 +349,8 @@ export default function DashboardPage() {
                   <p className="text-sm text-ink-soft">Todavía no hay ventas registradas.</p>
                 )}
               </div>
-            </section>
+              </section>
+            </div>
           </>
         )}
       </main>
