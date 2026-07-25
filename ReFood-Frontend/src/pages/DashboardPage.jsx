@@ -183,6 +183,12 @@ export default function DashboardPage() {
       scale: 2,
       useCORS: true,
       backgroundColor: getComputedStyle(document.body).backgroundColor || '#ffffff',
+      onclone: (clonedDoc) => {
+        const target = clonedDoc.getElementById('dashboard-capture')
+        if (target) {
+          target.style.padding = '24px'
+        }
+      },
     })
   }
 
@@ -296,7 +302,7 @@ export default function DashboardPage() {
           </div>
         ) : (
           <>
-            <div ref={dashboardRef} className="space-y-6">
+            <div ref={dashboardRef} id="dashboard-capture" className="space-y-6">
               <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
               <MetricCard title="Pedidos hoy" value={metrics.todayOrders} icon={<ShoppingBag className="w-5 h-5" />} accent="accent" />
               <MetricCard title="Pedidos esta semana" value={metrics.weekOrders} icon={<Package className="w-5 h-5" />} accent="deal" />
@@ -384,7 +390,7 @@ export default function DashboardPage() {
                       <div key={`${product.name}-${index}`}>
                         <div className="mb-1 flex items-center justify-between text-sm">
                           <span className="text-ink">{product.name}</span>
-                          <span className="text-ink-soft">{product.quantity} und</span>
+                          <span className="text-ink-soft">{product.quantity}</span>
                         </div>
                         <div className="h-2 rounded-full bg-surface-sunken">
                           <div className="h-2 rounded-full bg-accent" style={{ width: `${(product.quantity / max) * 100}%` }} />
