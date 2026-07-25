@@ -306,7 +306,7 @@ export default function DashboardPage() {
             <div ref={dashboardRef} id="dashboard-capture" className="space-y-6">
               <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
               <MetricCard title="Pedidos hoy" value={metrics.todayOrders} icon={<ShoppingBag className="w-5 h-5" />} accent="accent" />
-              <MetricCard title="Pedidos esta semana" value={metrics.weekOrders} icon={<Package className="w-5 h-5" />} accent="deal" />
+              <MetricCard title="Pedidos entregados esta semana" value={metrics.weekOrders} icon={<Package className="w-5 h-5" />} accent="deal" />
               <MetricCard title="Usuarios registrados y activos" value={metrics.totalUsers} icon={<Users className="w-5 h-5" />} accent="accent" />
               <MetricCard title="Próx. a vencer (7 días)" value={metrics.expiringProducts} icon={<AlertTriangle className="w-5 h-5" />} accent="error" />
               <MetricCard title="Stock bajo (< 5)" value={metrics.lowStockProducts} icon={<Boxes className="w-5 h-5" />} accent="deal" />
