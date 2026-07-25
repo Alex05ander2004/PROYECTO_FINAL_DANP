@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Mail, Lock, Loader2, Leaf } from 'lucide-react'
-import { login, getMe } from '../api/authService'
+import { login, getMe, validateStoredSession } from '../api/authService'
 import ThemeToggle from '../components/ThemeToggle'
 
 export default function LoginPage() {
@@ -12,9 +12,19 @@ export default function LoginPage() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    const token = localStorage.getItem('access_token')
-    if (token) {
-      navigate('/products', { replace: true })
+    let isMounted = true
+
+    async function checkStoredSession() {
+      const valid = await validateStoredSession()
+      if (isMounted && valid) {
+        navigate('/products', { replace: true })
+      }
+    }
+
+    checkStoredSession()
+
+    return () => {
+      isMounted = false
     }
   }, [navigate])
 
