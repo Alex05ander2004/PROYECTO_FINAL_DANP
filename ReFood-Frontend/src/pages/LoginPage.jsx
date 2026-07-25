@@ -17,7 +17,7 @@ export default function LoginPage() {
     async function checkStoredSession() {
       const valid = await validateStoredSession()
       if (isMounted && valid) {
-        navigate('/products', { replace: true })
+        navigate('/dashboard', { replace: true })
       }
     }
 
@@ -45,7 +45,7 @@ export default function LoginPage() {
 
       localStorage.setItem('access_token', access)
       localStorage.setItem('refresh_token', refresh)
-      navigate('/products')
+      navigate('/dashboard')
     } catch (err) {
       if (err.response?.status === 401) {
         setError('Correo o contraseña incorrectos.')

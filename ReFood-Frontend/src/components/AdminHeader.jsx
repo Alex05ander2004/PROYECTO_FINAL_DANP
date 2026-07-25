@@ -3,6 +3,7 @@ import { LogOut, Leaf } from 'lucide-react'
 import ThemeToggle from './ThemeToggle'
 
 const NAV_LINKS = [
+  { to: '/dashboard', label: 'Dashboard' },
   { to: '/products', label: 'Productos' },
   { to: '/orders', label: 'Pedidos' },
   { to: '/users', label: 'Usuarios' },
