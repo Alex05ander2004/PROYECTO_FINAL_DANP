@@ -220,26 +220,27 @@ export default function DashboardPage() {
 
       const imgData = canvas.toDataURL('image/png')
 
-      const doc = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4' })
+      const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' })
       const pageWidth = doc.internal.pageSize.getWidth()
       const pageHeight = doc.internal.pageSize.getHeight()
+      const margin = 24
 
-      const imgWidth = pageWidth
-      const imgHeight = (canvas.height * imgWidth) / canvas.width
+      const availableWidth = pageWidth - margin * 2
+      const availableHeight = pageHeight - margin * 2
 
-      let heightLeft = imgHeight
-      let position = 0
+      const canvasRatio = canvas.width / canvas.height
+      let drawWidth = availableWidth
+      let drawHeight = drawWidth / canvasRatio
 
-      doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
-      heightLeft -= pageHeight
-
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight
-        doc.addPage()
-        doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight)
-        heightLeft -= pageHeight
+      if (drawHeight > availableHeight) {
+        drawHeight = availableHeight
+        drawWidth = drawHeight * canvasRatio
       }
 
+      const x = (pageWidth - drawWidth) / 2
+      const y = (pageHeight - drawHeight) / 2
+
+      doc.addImage(imgData, 'PNG', x, y, drawWidth, drawHeight)
       doc.save(`dashboard-refood-${formatFileDate(new Date())}.pdf`)
     } catch (error) {
       console.error('No se pudo generar el PDF.', error)
