@@ -47,6 +47,13 @@ function parseDate(value) {
   return Number.isNaN(date.getTime()) ? null : date
 }
 
+function formatFileDate(date) {
+  const day = String(date.getDate()).padStart(2, '0')
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const year = date.getFullYear()
+  return `${day}-${month}-${year}`
+}
+
 export default function DashboardPage() {
   const [orders, setOrders] = useState([])
   const [users, setUsers] = useState([])
@@ -167,18 +174,43 @@ export default function DashboardPage() {
     segments.push(`${meta.color} ${startPercent}% ${endPercent}%`)
     return segments
   }, [])
+  
+  // Generación de imagen y PDF del dashboard
+  async function captureDashboard() {
+    if (!dashboardRef.current) return null
 
-  async function handleExportPdf() {
-    if (!dashboardRef.current) return
+    return html2canvas(dashboardRef.current, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: getComputedStyle(document.body).backgroundColor || '#ffffff',
+    })
+  }
 
+  async function handleExportImage() {
     setExporting(true)
 
     try {
-      const canvas = await html2canvas(dashboardRef.current, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: getComputedStyle(document.body).backgroundColor || '#ffffff',
-      })
+      const canvas = await captureDashboard()
+      if (!canvas) return
+
+      const link = document.createElement('a')
+      link.download = `dashboard-refood-${formatFileDate(new Date())}.png`
+      link.href = canvas.toDataURL('image/png')
+      link.click()
+    } catch (error) {
+      console.error('No se pudo generar la imagen.', error)
+      window.alert(`No se pudo generar la imagen: ${error.message || 'error desconocido'}`)
+    } finally {
+      setExporting(false)
+    }
+  }
+
+  async function handleExportPdf() {
+    setExporting(true)
+
+    try {
+      const canvas = await captureDashboard()
+      if (!canvas) return
 
       const imgData = canvas.toDataURL('image/png')
 
@@ -202,8 +234,7 @@ export default function DashboardPage() {
         heightLeft -= pageHeight
       }
 
-      const fileName = `dashboard-refood-${new Date().toISOString().slice(0, 10)}.pdf`
-      doc.save(fileName)
+      doc.save(`dashboard-refood-${formatFileDate(new Date())}.pdf`)
     } catch (error) {
       console.error('No se pudo generar el PDF.', error)
       window.alert(`No se pudo generar el PDF: ${error.message || 'error desconocido'}`)
@@ -238,14 +269,25 @@ export default function DashboardPage() {
             <h1 className="text-xl font-semibold text-ink tracking-tight">Resumen del negocio</h1>
           </div>
 
-          <button
-            onClick={handleExportPdf}
-            disabled={exporting}
-            className="inline-flex items-center gap-2 rounded-sm border border-line bg-surface px-3 py-2 text-sm font-medium text-ink transition hover:bg-surface-sunken disabled:opacity-60"
-          >
-            <Download className="w-4 h-4" />
-            {exporting ? 'Generando PDF...' : 'Descargar PDF'}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleExportImage}
+              disabled={exporting}
+              className="inline-flex items-center gap-2 rounded-sm border border-line bg-surface px-3 py-2 text-sm font-medium text-ink transition hover:bg-surface-sunken disabled:opacity-60"
+            >
+              <Download className="w-4 h-4" />
+              {exporting ? 'Generando...' : 'Descargar imagen'}
+            </button>
+
+            <button
+              onClick={handleExportPdf}
+              disabled={exporting}
+              className="inline-flex items-center gap-2 rounded-sm border border-line bg-surface px-3 py-2 text-sm font-medium text-ink transition hover:bg-surface-sunken disabled:opacity-60"
+            >
+              <Download className="w-4 h-4" />
+              {exporting ? 'Generando PDF...' : 'Descargar PDF'}
+            </button>
+          </div>
         </div>
 
         {error ? (
