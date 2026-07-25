@@ -176,6 +176,24 @@ export default function DashboardPage() {
   }, [])
   
   // Generación de imagen y PDF del dashboard
+  async function inlineStylesheets(clonedDoc) {
+    const links = Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
+
+    await Promise.all(
+      links.map(async (link) => {
+        try {
+          const response = await fetch(link.href)
+          const cssText = await response.text()
+          const style = clonedDoc.createElement('style')
+          style.textContent = cssText
+          clonedDoc.head.appendChild(style)
+        } catch (error) {
+          console.error('No se pudo inlinear stylesheet:', link.href, error)
+        }
+      })
+    )
+  }
+
   async function captureDashboard() {
     if (!dashboardRef.current) return null
 
@@ -183,11 +201,12 @@ export default function DashboardPage() {
       scale: 2,
       useCORS: true,
       backgroundColor: getComputedStyle(document.body).backgroundColor || '#ffffff',
-      onclone: (clonedDoc) => {
+      onclone: async (clonedDoc) => {
         const target = clonedDoc.getElementById('dashboard-capture')
         if (target) {
           target.style.padding = '24px'
         }
+        await inlineStylesheets(clonedDoc)
       },
     })
   }
