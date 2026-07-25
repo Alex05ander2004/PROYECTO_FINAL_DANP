@@ -4,6 +4,7 @@ import ProductsPage from './pages/ProductsPage'
 import ProductFormPage from './pages/ProductFormPage'
 import OrdersPage from './pages/OrdersPage'
 import UsersPage from './pages/UsersPage'
+import NotFoundPage from './pages/NotFoundPage'
 import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
         <Route path="/products/:id/edit" element={<ProtectedRoute><ProductFormPage /></ProtectedRoute>} />
         <Route path="/orders" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
         <Route path="/users" element={<ProtectedRoute><UsersPage /></ProtectedRoute>} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
   )
