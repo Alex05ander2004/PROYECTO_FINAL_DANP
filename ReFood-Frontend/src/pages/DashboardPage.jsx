@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { AlertTriangle, Boxes, Download, Package, ShoppingBag, Users } from 'lucide-react'
 import jsPDF from 'jspdf'
-import html2canvas from 'html2canvas'
+import html2canvas from 'html2canvas-pro'
 import AdminHeader from '../components/AdminHeader'
 import { getOrders } from '../api/orderService'
 import { getProducts } from '../api/productService'
