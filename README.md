@@ -15,14 +15,13 @@ carpeta. Todo el trabajo (backend, app y panel) ya está integrado en `main`.
 
 ## 🚀 Probar la app desplegada
 
-Backend y panel de administración están en producción — no hace falta levantar nada en tu
-PC para probarlos:
+Paneles de administración, tanto backend, como frontend ya se encuentran en producción:
 
 | Componente | URL | Notas |
 |---|---|---|
 | **Panel de Administración** | https://proyecto-final-danp.vercel.app | Panel de administrador en frontend (oficial). |
 | **Backend (admin)** | https://proyecto-final-danp.onrender.com/admin/ | Panel de administrador en backend. |
-| ** API** | https://proyecto-final-danp.onrender.com/api/ | Usado tanto por el panel, como por la app Android. |
+| **API** | https://proyecto-final-danp.onrender.com/api/ | Usado tanto por el panel frontend, como por la app Android. |
 | **App Android** | — | No hay un APK público todavía; se debe abrir `ReFood-App/` en Android Studio y ejecutar sobre un emulador o celular. |
 
 ⚠️ El backend está en el plan gratuito de Render, por lo cual, si no recibe solicitudes pasado un tiempo, el servidor "se duerme" y el primer request puede tardar **50 segundos o más** en responder mientras el servidor "despierta".
@@ -37,4 +36,4 @@ Solicitar correo y contraseña de administrador a uno de los desarrolladores del
 - **Imágenes de producto**: Supabase Storage (bucket público `product-images`), no en el disco del backend (Render tiene disco efímero: cualquier archivo subido localmente se perdería en el próximo deploy).
 - **Backend**: [Render](https://render.com) (plan free — gunicorn + whitenoise).
 - **Panel de administración**: [Vercel](https://vercel.com).
-- **Notificaciones push**: Firebase Cloud Messaging, para avisar a los clientes cuando un producto que les interesa está por vencer.
+- **Notificaciones push**: Firebase Cloud Messaging, para avisar a los clientes cuando un producto está por vencer.
