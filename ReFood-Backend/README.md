@@ -11,27 +11,16 @@ backend en tu propia máquina.
 
 Detalles de la infraestructura:
 
-- **Hosting**: [Render](https://render.com) (plan free), desplegado desde la rama `main`.
-  El servicio "duerme" tras un rato sin tráfico; el primer request tras eso puede tardar
-  50s+ en responder mientras arranca de nuevo.
-- **Base de datos**: Postgres en Supabase, accedido vía el *connection pooler*
-  (`aws-*.pooler.supabase.com`, no el host directo `db.<ref>.supabase.co`) porque Render no
-  tiene salida IPv6 y la conexión directa de Supabase resuelve a una IP IPv6.
-- **Imágenes de producto**: Supabase Storage (bucket `product-images`), no el filesystem
-  local — Render tiene disco efímero, así que cualquier imagen subida se perdería en el
-  siguiente deploy si se guardara ahí.
-- **Variables de entorno**: configuradas directamente en el dashboard de Render
-  (Environment), con los mismos nombres que en `.env.example` más
-  `SUPABASE_STORAGE_*` y `FIREBASE_CREDENTIALS_JSON` (ver más abajo).
+- **Hosting**: [Render](https://render.com) (plan free), desplegado desde la rama `main`. El servicio "duerme" tras un rato sin tráfico; el primer request tras eso puede tardar más de 50 segundos en responder mientras arranca de nuevo.
+- **Base de datos**: Postgres en Supabase, accedido vía el *connection pooler* (`aws-*.pooler.supabase.com`, no el host directo `db.<ref>.supabase.co`) porque Render no tiene salida IPv6 y la conexión directa de Supabase resuelve a una IP IPv6.
+- **Imágenes de producto**: Supabase Storage (bucket `product-images`), no el filesystem local — Render tiene disco efímero, así que cualquier imagen subida se perdería en el siguiente deploy si se guardara ahí.
+- **Variables de entorno**: configuradas directamente en el dashboard de Render (Environment), con los mismos nombres que en `.env.example` (ver más abajo).
 
 ## Requisitos previos (para correrlo en local)
 
 - Python 3.10 o superior
 - Git
-- Acceso a la base de datos Postgres del proyecto en Supabase (pide las
-  credenciales al equipo — ver sección "Base de datos" abajo). También se
-  puede usar Postgres local (con pgAdmin) si prefieres una copia propia
-  para desarrollar sin conexión.
+- Postgres local (con pgAdmin)
 
 ## 1. Crear y activar el entorno virtual
 
@@ -58,13 +47,7 @@ python -m pip install -r requirements.txt
 
 El proyecto usa **Supabase** (Postgres administrado) como base de datos
 compartida por todo el equipo — así todos trabajan sobre los mismos datos
-sin tener que sincronizar copias locales. Pide a un compañero las
-credenciales de conexión (host, puerto, usuario, contraseña) desde el panel
-de Supabase (Project Settings → Database, o el botón "Connect"), **nunca
-se comparten por git**.
-
-Alternativa para desarrollar sin conexión (base propia, no compartida):
-usando pgAdmin local:
+sin tener que sincronizar copias locales, pero se recomienda desarrollar con una base de datos propia, usando pgAdmin local:
 
 1. Crea una base de datos, ej. `refood_db`
 2. Crea un rol/usuario, ej. `refood_user`, con una contraseña, con **Can login = Yes**
@@ -76,15 +59,15 @@ GRANT ALL ON SCHEMA public TO refood_user;
 ALTER SCHEMA public OWNER TO refood_user;
 ```
 
-## 4. Configurar variables de entorno
+## 4. Configura variables de entorno
 
-Copia la plantilla:
+Copiar la plantilla:
 
 ```bash
 cp .env.example .env
 ```
 
-Genera tu propio `SECRET_KEY`:
+Genera tu propio `SECRET_KEY` de DJango:
 
 ```bash
 python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
