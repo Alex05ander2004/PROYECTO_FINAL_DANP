@@ -5,15 +5,14 @@ React + Vite, consumiendo la API REST del backend Django.
 
 ## 🚀 En producción
 
-Ya está desplegado en **https://proyecto-final-danp.vercel.app** — pide a un compañero las
-credenciales de una cuenta administradora para entrar. Apunta al backend en Render, no hace
-falta correr nada en local para probarlo.
+Ya está desplegado en **https://proyecto-final-danp.vercel.app** — solicitar a un desarrollador las credenciales de una cuenta administradora para entrar. Apunta al backend en Render, no hace falta correr nada en local para probarlo.
 
 ## Funcionalidades
 
 | Módulo | Descripción |
 |---|---|
 | **Login** | Solo para cuentas con rol Administrador (los clientes usan la app Android). |
+| **Dashboard** | Información sobre productos más vendidos, estado de pedidos, reporte de ventas, etc., con la posibilidad de exportar el dashboard como imagen y PDF. |
 | **Productos** | Listado, alta, edición y borrado. Precio, descuento, stock, categoría, fecha de vencimiento e imagen. |
 | **Pedidos** | Listado de todos los pedidos, con detalle de productos, método de pago (Tarjeta/Yape/Plin) y cambio de estado. |
 | **Usuarios** | Listado y gestión de cuentas registradas. |
@@ -23,6 +22,7 @@ falta correr nada en local para probarlo.
 ### Requisitos
 
 - Node.js 18+
+- Git
 - El backend corriendo (local o apuntando al de Render — ver más abajo)
 
 ### Pasos
@@ -32,8 +32,8 @@ npm install
 npm run dev
 ```
 
-Por defecto usa `http://127.0.0.1:8000/api` (backend local). Para apuntar a otro backend
-(por ejemplo, el de producción en Render), copia `.env.example` a `.env` y define:
+Por defecto se usa `http://127.0.0.1:8000/api` (backend local). Para apuntar a otro backend
+(por ejemplo, el de producción en Render, no recomendado), copia `.env.example` a `.env` y define:
 
 ```
 VITE_API_BASE_URL=https://proyecto-final-danp.onrender.com/api
