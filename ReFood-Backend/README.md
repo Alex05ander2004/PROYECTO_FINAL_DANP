@@ -115,10 +115,15 @@ probar desde un celular conectado a la misma WiFi:
 Si usas el emulador de Android Studio (no un celular físico), no hace falta
 nada de esto: el alias `10.0.2.2` ya apunta al `localhost` de tu PC.
 
-## Notificaciones de vencimiento (Firebase)
+## Vencimiento de productos: desactivación automática y notificaciones (Firebase)
 
-Cuando a un producto le queda poco tiempo, un comando sube su descuento
-automáticamente y envía una notificación push a los usuarios registrados:
+Un mismo comando (`check_expiring_products`) hace dos cosas cada vez que corre:
+
+1. **Desactiva** (`is_active = False`) los productos cuya fecha de vencimiento ya pasó —
+   dejan de ser visibles y comprables para clientes (mismo campo que ya usa el admin para
+   ocultar productos a mano), aunque el administrador los sigue viendo en el panel.
+2. Para los productos que **aún no vencen** pero están cerca, sube su descuento
+   automáticamente y envía una notificación push a los usuarios registrados:
 
 | Días restantes | Descuento mínimo |
 |---|---|
