@@ -26,7 +26,11 @@ class ProductViewSet(viewsets.ModelViewSet):
         queryset = Product.objects.select_related('category')
 
         if self.request.user.role != 'ADMIN':
-            queryset = queryset.filter(is_active=True)
+            # stock=0 se filtra aparte de is_active: a diferencia de una
+            # desactivacion manual o por vencimiento, el stock se recupera
+            # solo con el proximo reabastecimiento, sin que un admin tenga
+            # que reactivar el producto a mano.
+            queryset = queryset.filter(is_active=True, stock__gt=0)
 
         featured = self.request.query_params.get('is_featured_offer')
         category = self.request.query_params.get('category')

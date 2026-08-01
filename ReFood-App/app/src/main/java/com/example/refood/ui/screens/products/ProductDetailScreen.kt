@@ -138,18 +138,32 @@ fun ProductDetailScreen(
                 InfoRow(label = "Stock disponible", value = "${product.stock} unidades")
                 InfoRow(label = "Fecha de vencimiento", value = product.expirationDateLabel)
 
-                Spacer(modifier = Modifier.height(20.dp))
-                Text(text = "Cantidad", style = MaterialTheme.typography.titleSmall)
-                Spacer(modifier = Modifier.height(8.dp))
-                QuantityStepper(
-                    quantity = uiState.quantity,
-                    onIncrement = viewModel::incrementQuantity,
-                    onDecrement = viewModel::decrementQuantity
-                )
+                if (uiState.isOutOfStock) {
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Text(
+                        text = "Este producto se agotó. Vuelve a revisar más tarde.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                } else {
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Text(text = "Cantidad", style = MaterialTheme.typography.titleSmall)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    QuantityStepper(
+                        quantity = uiState.quantity,
+                        onIncrement = viewModel::incrementQuantity,
+                        onDecrement = viewModel::decrementQuantity
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(24.dp))
                 PrimaryButton(
-                    text = "Agregar al carrito · S/ %.2f".format(product.effectivePrice * uiState.quantity),
+                    text = if (uiState.isOutOfStock) {
+                        "Agotado"
+                    } else {
+                        "Agregar al carrito · S/ %.2f".format(product.effectivePrice * uiState.quantity)
+                    },
+                    enabled = !uiState.isOutOfStock,
                     onClick = viewModel::addToCart
                 )
                 Spacer(modifier = Modifier.height(16.dp))

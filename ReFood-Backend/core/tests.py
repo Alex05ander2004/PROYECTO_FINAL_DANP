@@ -116,6 +116,22 @@ class CheckExpiringProductsTests(TestCase):
         self.assertIsNone(product.discount_percentage)
 
     @patch('core.management.commands.check_expiring_products.messaging.send_each')
+    def test_deactivates_expired_products(self, mock_send):
+        mock_send.return_value = _fake_send_each_response()
+        product = self._make_product(days_left=-1)
+        call_command('check_expiring_products')
+        product.refresh_from_db()
+        self.assertFalse(product.is_active)
+
+    @patch('core.management.commands.check_expiring_products.messaging.send_each')
+    def test_does_not_deactivate_product_expiring_today(self, mock_send):
+        mock_send.return_value = _fake_send_each_response()
+        product = self._make_product(days_left=0)
+        call_command('check_expiring_products')
+        product.refresh_from_db()
+        self.assertTrue(product.is_active)
+
+    @patch('core.management.commands.check_expiring_products.messaging.send_each')
     def test_sends_notification_to_registered_tokens(self, mock_send):
         mock_send.return_value = _fake_send_each_response(success_count=1)
         User.objects.create_user(

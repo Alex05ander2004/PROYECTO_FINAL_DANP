@@ -55,6 +55,26 @@ class ProductTests(APITestCase):
         response = self.client.get('/api/products/')
         self.assertEqual(len(response.data), 2)
 
+    def test_client_does_not_see_active_product_without_stock(self):
+        sold_out = Product.objects.create(
+            name='Agotado', description='...', category=self.category, price=8, unit='unidad',
+            stock=0, expiration_date=date.today() + timedelta(days=5), is_active=True,
+        )
+        self.client.force_authenticate(user=self.client_user)
+        response = self.client.get('/api/products/')
+        names = [p['name'] for p in response.data]
+        self.assertNotIn('Agotado', names)
+
+    def test_admin_sees_active_product_without_stock(self):
+        Product.objects.create(
+            name='Agotado', description='...', category=self.category, price=8, unit='unidad',
+            stock=0, expiration_date=date.today() + timedelta(days=5), is_active=True,
+        )
+        self.client.force_authenticate(user=self.admin)
+        response = self.client.get('/api/products/')
+        names = [p['name'] for p in response.data]
+        self.assertIn('Agotado', names)
+
     def test_client_cannot_create_product(self):
         self.client.force_authenticate(user=self.client_user)
         response = self.client.post('/api/products/', {

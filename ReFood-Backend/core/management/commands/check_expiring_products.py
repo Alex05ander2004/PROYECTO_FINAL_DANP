@@ -17,12 +17,18 @@ THRESHOLDS = [
 
 class Command(BaseCommand):
     help = (
-        'Sube el descuento y envia una notificacion push a los productos '
-        'activos que cruzan un umbral de dias para vencer.'
+        'Desactiva los productos que ya vencieron (dejan de ser comprables '
+        'y visibles para clientes), y sube el descuento + envia una '
+        'notificacion push a los que cruzan un umbral de dias para vencer.'
     )
 
     def handle(self, *args, **options):
         today = date.today()
+
+        deactivated = Product.objects.filter(
+            is_active=True, expiration_date__lt=today
+        ).update(is_active=False)
+
         products = Product.objects.filter(is_active=True, expiration_date__gte=today)
 
         updated = 0
@@ -49,6 +55,7 @@ class Command(BaseCommand):
                 notified += 1
 
         self.stdout.write(self.style.SUCCESS(
+            f'Productos desactivados por vencimiento: {deactivated}. '
             f'Productos actualizados: {updated}. Notificaciones enviadas: {notified}.'
         ))
 

@@ -30,7 +30,9 @@ data class ProductDetailUiState(
     val isLoading: Boolean = true,
     val addedToCart: Boolean = false,
     val errorMessage: String? = null
-)
+) {
+    val isOutOfStock: Boolean get() = product != null && product.stock <= 0
+}
 
 class ProductDetailViewModel(
     savedStateHandle: SavedStateHandle,
@@ -66,7 +68,7 @@ class ProductDetailViewModel(
 
     fun incrementQuantity() {
         val maxStock = uiState.value.product?.stock ?: Int.MAX_VALUE
-        quantity.update { (it + 1).coerceAtMost(maxStock.coerceAtLeast(1)) }
+        quantity.update { (it + 1).coerceAtMost(maxStock) }
     }
 
     fun decrementQuantity() {
@@ -74,6 +76,7 @@ class ProductDetailViewModel(
     }
 
     fun addToCart() {
+        if (uiState.value.isOutOfStock) return
         viewModelScope.launch {
             val userId = userIdFlow.first()
             cartRepository.addToCart(userId, productId, quantity.value)
