@@ -1,4 +1,5 @@
 import { X, MapPin, CreditCard, Clock, FileText } from 'lucide-react'
+import { formatCurrency } from '../utils/formatCurrency'
 
 const PAYMENT_LABELS = {
   EFECTIVO: 'Efectivo',
@@ -109,11 +110,11 @@ export default function OrderDetailModal({ order, statusMeta, onClose }) {
                     <div>
                       <div className="text-ink">{item.product_name}</div>
                       <div className="text-xs text-ink-soft">
-                        {item.quantity} x S/ {item.unit_price}
+                        {item.quantity} x {formatCurrency(item.unit_price)}
                       </div>
                     </div>
                     <div className="font-medium text-ink">
-                      S/ {(item.quantity * Number(item.unit_price)).toFixed(2)}
+                      {formatCurrency(item.quantity * Number(item.unit_price))}
                     </div>
                   </div>
                 ))
@@ -125,7 +126,7 @@ export default function OrderDetailModal({ order, statusMeta, onClose }) {
 
           <div className="flex items-center justify-between border-t border-line pt-3 text-base">
             <span className="font-medium text-ink">Total</span>
-            <span className="font-semibold text-ink">S/ {order.total}</span>
+            <span className="font-semibold text-ink">{formatCurrency(order.total)}</span>
           </div>
         </div>
       </div>

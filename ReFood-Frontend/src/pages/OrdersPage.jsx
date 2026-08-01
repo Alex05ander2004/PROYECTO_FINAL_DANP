@@ -5,6 +5,7 @@ import OrderDetailModal from '../components/OrderDetailModal'
 import AdminHeader from '../components/AdminHeader'
 import TableSkeleton from '../components/TableSkeleton'
 import SearchFilterBar from '../components/SearchFilterBar'
+import { formatCurrency } from '../utils/formatCurrency'
 
 const STATUS_OPTIONS = [
   { value: 'PENDIENTE', label: 'Pendiente', color: 'var(--color-status-pending)', icon: Clock },
@@ -160,7 +161,7 @@ export default function OrdersPage() {
                         <div className="text-xs text-ink-soft">{order.user_email}</div>
                       </td>
                       <td className="px-4 py-3 text-ink-soft max-w-xs">{itemsSummary(order.items)}</td>
-                      <td className="px-4 py-3 text-ink font-medium">S/ {order.total}</td>
+                      <td className="px-4 py-3 text-ink font-medium">{formatCurrency(order.total)}</td>
                       <td className="px-4 py-3">
                         <div className="text-ink-soft">
                           {PAYMENT_LABELS[order.payment_method] ?? order.payment_method}

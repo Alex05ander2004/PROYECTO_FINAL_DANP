@@ -7,6 +7,7 @@ import { getOrders } from '../api/orderService'
 import { getProducts } from '../api/productService'
 import { getUsers } from '../api/userService'
 import { useTheme } from '../context/ThemeContext'
+import { formatCurrency } from '../utils/formatCurrency'
 
 const STATUS_META = {
   PENDIENTE: { label: 'Pendiente', color: '#ad6a2e' },
@@ -19,14 +20,6 @@ const STATUS_META = {
 const EXPIRY_THRESHOLD_DAYS = 7
 const LOW_STOCK_THRESHOLD = 5
 const DELIVERED_STATUS = 'ENTREGADO'
-
-function formatCurrency(value) {
-  return new Intl.NumberFormat('es-PE', {
-    style: 'currency',
-    currency: 'PEN',
-    maximumFractionDigits: 0,
-  }).format(value)
-}
 
 function toDateKey(date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`

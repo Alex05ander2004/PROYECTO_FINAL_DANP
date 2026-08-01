@@ -5,6 +5,7 @@ import { deleteProduct, getProducts } from '../api/productService'
 import AdminHeader from '../components/AdminHeader'
 import TableSkeleton from '../components/TableSkeleton'
 import SearchFilterBar from '../components/SearchFilterBar'
+import { formatCurrency } from '../utils/formatCurrency'
 
 function daysUntil(dateString) {
   const target = new Date(`${dateString}T00:00:00`)
@@ -214,14 +215,14 @@ export default function ProductsPage() {
                       {product.discount_price != null ? (
                         <div>
                           <span className="line-through text-ink-soft text-xs mr-1">
-                            S/ {product.price}
+                            {formatCurrency(product.price)}
                           </span>
                           <span className="text-deal font-medium">
-                            S/ {product.discount_price}
+                            {formatCurrency(product.discount_price)}
                           </span>
                         </div>
                       ) : (
-                        <span className="text-ink">S/ {product.price}</span>
+                        <span className="text-ink">{formatCurrency(product.price)}</span>
                       )}
                     </td>
                     <td className="px-4 py-3 text-ink-soft">
